@@ -1,19 +1,37 @@
+"""
+File:
+    source_container_repository.py
+
+Purpose:
+    Provides database access to persisted AlphaOmega Source Containers.
+"""
+
+
 class SourceContainerRepository:
     """
     Database access for persisted AlphaOmega Source Containers.
 
     This repository owns ordinary source_containers table access.
-    It does not enumerate Sources of Truth, perform Source Container
-    Refresh reconciliation, or decide synchronization scope.
+
+    It does not:
+        - enumerate Sources of Truth
+        - perform Source Container Refresh reconciliation
+        - decide synchronization scope
+        - build application presentation structures
     """
 
-    def __init__(self, database_connection):
+    def __init__(
+        self,
+        database_connection,
+    ):
         if database_connection is None:
             raise ValueError(
                 "database_connection is required"
             )
 
-        self._client = database_connection.connect()
+        self._client = (
+            database_connection.connect()
+        )
 
     def find_by_id(
         self,
@@ -30,16 +48,25 @@ class SourceContainerRepository:
 
         response = (
             self._client
-            .table("source_containers")
-            .select("*")
+            .table(
+                "source_containers"
+            )
+            .select(
+                "*"
+            )
             .eq(
                 "id",
-                str(source_container_id),
+                str(
+                    source_container_id
+                ),
             )
             .execute()
         )
 
-        rows = response.data or []
+        rows = (
+            response.data
+            or []
+        )
 
         if not rows:
             return None
@@ -74,20 +101,31 @@ class SourceContainerRepository:
 
         response = (
             self._client
-            .table("source_containers")
-            .select("*")
+            .table(
+                "source_containers"
+            )
+            .select(
+                "*"
+            )
             .eq(
                 "source_id",
-                str(source_id),
+                str(
+                    source_id
+                ),
             )
             .eq(
                 "source_object_id",
-                str(source_object_id),
+                str(
+                    source_object_id
+                ),
             )
             .execute()
         )
 
-        rows = response.data or []
+        rows = (
+            response.data
+            or []
+        )
 
         if not rows:
             return None
@@ -108,6 +146,7 @@ class SourceContainerRepository:
     ):
         """
         Return every persisted Source Container for one Source.
+
         Active and inactive Containers are both returned because
         Source Container identity must survive inactivity and
         reappearance.
@@ -127,6 +166,7 @@ class SourceContainerRepository:
         containers = []
 
         while True:
+
             end_index = (
                 start_index
                 + page_size
@@ -135,13 +175,21 @@ class SourceContainerRepository:
 
             response = (
                 self._client
-                .table("source_containers")
-                .select("*")
+                .table(
+                    "source_containers"
+                )
+                .select(
+                    "*"
+                )
                 .eq(
                     "source_id",
-                    str(source_id),
+                    str(
+                        source_id
+                    ),
                 )
-                .order("id")
+                .order(
+                    "id"
+                )
                 .range(
                     start_index,
                     end_index,
@@ -149,12 +197,103 @@ class SourceContainerRepository:
                 .execute()
             )
 
-            page = response.data or []
-            containers.extend(page)
+            page = (
+                response.data
+                or []
+            )
+
+            containers.extend(
+                page
+            )
 
             if len(page) < page_size:
                 break
 
-            start_index += page_size
-            
+            start_index += (
+                page_size
+            )
+
+        return containers
+
+    def find_active_by_source(
+        self,
+        source_id,
+    ):
+        """
+        Return every active persisted Source Container for one Source.
+
+        This read supports application-facing Source browsing.
+
+        Only fields required to construct the application browsing
+        hierarchy are retrieved.
+
+        Results use explicit pagination so complete catalogs larger
+        than the Supabase response limit are returned.
+        """
+
+        if not source_id:
+            raise ValueError(
+                "source_id is required"
+            )
+
+        page_size = 1000
+        start_index = 0
+        containers = []
+
+        while True:
+
+            end_index = (
+                start_index
+                + page_size
+                - 1
+            )
+
+            response = (
+                self._client
+                .table(
+                    "source_containers"
+                )
+                .select(
+                    "id,"
+                    "source_id,"
+                    "source_object_id,"
+                    "parent_source_object_id,"
+                    "name"
+                )
+                .eq(
+                    "source_id",
+                    str(
+                        source_id
+                    ),
+                )
+                .eq(
+                    "is_active",
+                    True,
+                )
+                .order(
+                    "id"
+                )
+                .range(
+                    start_index,
+                    end_index,
+                )
+                .execute()
+            )
+
+            page = (
+                response.data
+                or []
+            )
+
+            containers.extend(
+                page
+            )
+
+            if len(page) < page_size:
+                break
+
+            start_index += (
+                page_size
+            )
+
         return containers
