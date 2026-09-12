@@ -1,0 +1,20 @@
+*************************************************************************************
+This was a test of the OneNote container enumerator ran on 09/3/2026
+*************************************************************************************
+
+PS C:\Users\david\onedrive\alphaomega> python -c "from scripts.connectors.ms_graph.onenote_container_enumerator import OneNoteContainerEnumerator; print(OneNoteContainerEnumerator.source_name)"
+onenote
+PS C:\Users\david\onedrive\alphaomega> python -c "from scripts.connectors.ms_graph.onenote_container_enumerator import OneNoteContainerEnumerator; r = OneNoteContainerEnumerator().enumerate(); print('Complete:', r['enumeration_complete']); print('Containers:', len(r['containers']))"
+Complete: True
+Containers: 210
+PS C:\Users\david\onedrive\alphaomega> python -c "from scripts.connectors.ms_graph.onenote_container_enumerator import OneNoteContainerEnumerator; r = OneNoteContainerEnumerator().enumerate(); [print(c) for c in r['containers'][:10]]"
+{'source_object_id': '0-70EE5AA1D6A4DA1F!se2b4ead11129424ba78855cbf5b8a014', 'parent_source_object_id': None, 'name': 'AIOS'}
+{'source_object_id': '0-70EE5AA1D6A4DA1F!sa3b542464493474582cebe3e8326f1a1', 'parent_source_object_id': '0-70EE5AA1D6A4DA1F!se2b4ead11129424ba78855cbf5b8a014', 'name': 'Council'}
+{'source_object_id': '0-70EE5AA1D6A4DA1F!se67b3e63f5b744b3a96df76e5a0fd59b', 'parent_source_object_id': '0-70EE5AA1D6A4DA1F!se2b4ead11129424ba78855cbf5b8a014', 'name': 'Decision Logs'}
+{'source_object_id': '0-70EE5AA1D6A4DA1F!s26de878901874a0eb8700623491794a2', 'parent_source_object_id': '0-70EE5AA1D6A4DA1F!se2b4ead11129424ba78855cbf5b8a014', 'name': 'Evolution'}
+{'source_object_id': '0-70EE5AA1D6A4DA1F!scc5cb02d962347e6a90e0f09e2906e15', 'parent_source_object_id': '0-70EE5AA1D6A4DA1F!se2b4ead11129424ba78855cbf5b8a014', 'name': 'Knowledge Spine'}
+{'source_object_id': '0-70EE5AA1D6A4DA1F!s9f9d2725ecc54ab38c253e0a195a7af1', 'parent_source_object_id': '0-70EE5AA1D6A4DA1F!se2b4ead11129424ba78855cbf5b8a014', 'name': 'The Core'}
+{'source_object_id': '0-70EE5AA1D6A4DA1F!71728', 'parent_source_object_id': None, 'name': 'Cobit 5'}
+{'source_object_id': '0-70EE5AA1D6A4DA1F!71730', 'parent_source_object_id': '0-70EE5AA1D6A4DA1F!71728', 'name': 'Quick Notes'}
+{'source_object_id': '0-70EE5AA1D6A4DA1F!377101', 'parent_source_object_id': None, 'name': 'D_D 5e Swamp Adventure'}
+{'source_object_id': '0-70EE5AA1D6A4DA1F!s7aafafebde7d48f7a24855496cb740ab', 'parent_source_object_id': '0-70EE5AA1D6A4DA1F!377101', 'name': 'Adventure'}

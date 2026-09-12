@@ -1,0 +1,55 @@
+*************************************************************************************
+This records the first successful combined production Source Container Refresh.
+This was performed on 09/12/2026 @ 1146 hours.
+This included only OneNote and OneDrive.
+This record will now serve as a baseline.
+*************************************************************************************
+
+PS C:\Users\david\onedrive\AlphaOmega> python -m scripts.application.refresh_all_source_containers
+
+============================================================
+AlphaOmega Complete Source Container Refresh
+============================================================
+
+Starting complete OneDrive Source Container Refresh.
+  Source ID : f4c083ee-e9b6-4441-b0ea-22486196b32d
+
+PASS: OneDrive Source Container Refresh completed.
+  Processing Job ID : 92c3afcc-9a8a-4aa5-94c9-031673cd54cd
+  Observed          : 6509
+  New               : 0
+  Existing          : 6509
+  Reappearing       : 0
+  Absent            : 0
+  Upserted          : 6509
+  Deactivated       : 0
+  Elapsed Time      : 9 minutes 36.29 seconds
+
+Starting complete OneNote Source Container Refresh.
+  Source ID : 39944f99-e5da-487d-800b-8d92d0b61b6f
+
+PASS: OneNote Source Container Refresh completed.
+  Processing Job ID : 2c1d0faa-fd0c-44dd-a19d-c755c4695a08
+  Observed          : 211
+  New               : 0
+  Existing          : 211
+  Reappearing       : 0
+  Absent            : 0
+  Upserted          : 211
+  Deactivated       : 0
+  Elapsed Time      : 2.12 seconds
+
+============================================================
+Complete Refresh Summary
+============================================================
+  Sources Refreshed : 2
+  Total Observed    : 6720
+  Total New         : 0
+  Total Existing    : 6720
+  Total Reappearing : 0
+  Total Absent      : 0
+  Total Upserted    : 6720
+  Total Deactivated : 0
+  Total Time        : 9 minutes 40.25 seconds
+
+ALL SOURCE CONTAINER REFRESHES: PASS

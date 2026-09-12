@@ -1,0 +1,16 @@
+*************************************************************************************
+This was a test of the OneDrive container enumerator ran on 09/3/2026
+*************************************************************************************
+
+PS C:\Users\david\onedrive\alphaomega> python -c "from scripts.connectors.ms_graph.onedrive_container_enumerator import OneDriveContainerEnumerator; print(OneDriveContainerEnumerator.source_name)"
+onedrive
+PS C:\Users\david\onedrive\alphaomega> python -c "from scripts.connectors.ms_graph.onedrive_container_enumerator import OneDriveContainerEnumerator; r = OneDriveContainerEnumerator().enumerate(); print('Complete:', r['enumeration_complete']); print('Containers:', len(r['containers'])); print('Delta link:', bool(r['delta_link']))"
+Complete: True
+Containers: 6506
+Delta link: True
+PS C:\Users\david\onedrive\alphaomega> python -c "from scripts.connectors.ms_graph.onedrive_container_enumerator import OneDriveContainerEnumerator; r = OneDriveContainerEnumerator().enumerate(); [print(c) for c in r['containers'][:5]]"
+{'source_object_id': '70EE5AA1D6A4DA1F!sea8cc6beffdb43d7976fbc7da445c639', 'parent_source_object_id': None, 'name': 'root'}
+{'source_object_id': '70EE5AA1D6A4DA1F!729267', 'parent_source_object_id': '70EE5AA1D6A4DA1F!sea8cc6beffdb43d7976fbc7da445c639', 'name': 'Brayden'}
+{'source_object_id': '70EE5AA1D6A4DA1F!11819', 'parent_source_object_id': '70EE5AA1D6A4DA1F!sea8cc6beffdb43d7976fbc7da445c639', 'name': 'My Pictures'}
+{'source_object_id': '70EE5AA1D6A4DA1F!650272', 'parent_source_object_id': '70EE5AA1D6A4DA1F!11819', 'name': 'Twix'}
+{'source_object_id': '70EE5AA1D6A4DA1F!768697', 'parent_source_object_id': '70EE5AA1D6A4DA1F!sea8cc6beffdb43d7976fbc7da445c639', 'name': 'Lego Manuals'}

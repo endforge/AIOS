@@ -1,0 +1,63 @@
+1. scripts
+	a. code_testing
+		_pycache_
+	b. connectors
+		_pycache_
+		ms_graph
+			_pycache_
+			_init_.py
+			graph_connection.py
+			graph_connector.py
+			onedrive_content_retriever.py
+			onenote_content_retriever.py
+		base_connector.py
+		connector_loader.py
+		connector_section.py
+	c. database
+		_pycache_
+		database_connection.py
+		knowledge_object_repository.py
+		processing_job_repository.py
+		source_repository.py
+	d. discovery
+		_pycache_
+		discovery_comparator.py
+		discovery_record.py
+		discovery_section.py
+		discovery_service.py
+	e. extraction
+		_pycache_
+		content_hasher.py
+		content_retriever_router.py
+		extraction_record.py
+		extraction_section.py
+		extraction_service.py
+		text_extractor.py
+	f. load
+		_pycache_
+		sql
+			load_knowledge_object.sql
+		load_repository.py
+		load_section.py
+		load_service.py
+	g. orchestration
+		_pycache_
+		sync_orchestrator.py
+	h. sync
+		_pycache_
+		sync_association.py
+		sync_base_section.py
+		sync_exceptions.py
+		sync_history_section.py
+		sync_identity_section.py
+		sync_record.py
+		sync_state.py
+		sync_translation_input.py
+	i. translator
+		_pycache_
+		base_translator.py
+		graph_translator.py
+		graph_translator_mappings.py
+		translator_loader.py
+		translator_record.py
+		translator_section.py
