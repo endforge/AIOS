@@ -2,28 +2,31 @@
 AlphaOmega Script Inventory Refresh
 
 Purpose:
-    Maintains the development metadata inventory stored in the
+    Maintains the development implementation inventory stored in the
     public.scripts table.
 
 Responsibilities:
-    - Recursively discover Python and SQL files in the AIOS repository.
-    - Extract useful structural metadata without executing source code.
-    - Calculate a SHA-256 hash for each artifact.
-    - Insert new artifacts.
-    - Update changed or previously known artifacts.
-    - Mark artifacts inactive when they no longer exist in the repository.
+    - Discover Python and SQL artifacts in the AIOS repository.
+    - Extract human-authored documentation metadata.
+    - Extract deterministic implementation metadata.
+    - Resolve internal Python dependencies to repository artifacts.
+    - Detect database table and RPC relationships.
+    - Measure documentation compliance.
+    - Maintain active and inactive artifact state.
 
-This utility does NOT:
-    - Execute discovered Python or SQL code.
+Does NOT:
+    - Execute discovered Python or SQL artifacts.
+    - Modify discovered source files.
     - Create Knowledge Objects.
     - Synchronize AlphaOmega content.
-    - Modify source files.
-    - Make architectural decisions about discovered artifacts.
+    - Infer architectural intent that is not documented in source.
+    - Determine inbound dependencies manually.
 """
 
 import ast
 import hashlib
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 
 from common.security.local_credential_provider import (
@@ -55,6 +58,20 @@ EXCLUDED_DIRECTORIES = {
     "venv",
 }
 
+DOCUMENTATION_HEADINGS = {
+    "purpose:": "purpose",
+    "responsibilities:": "responsibilities",
+    "verifies:": "verifies",
+    "does not:": "exclusions",
+    "this module does not:": "exclusions",
+    "this repository does not:": "exclusions",
+    "this utility does not:": "exclusions",
+    "this script does not:": "exclusions",
+    "this test does not:": "exclusions",
+}
+
+UPSERT_BATCH_SIZE = 100
+
 
 # ============================================================================
 # Repository Location
@@ -63,51 +80,9 @@ EXCLUDED_DIRECTORIES = {
 def get_repository_root():
     """
     Determine the AIOS repository root from this script's location.
-
-    Expected location:
-        AIOS/scripts/administration/refresh_script_inventory.py
     """
 
     return Path(__file__).resolve().parents[2]
-
-
-# ============================================================================
-# File Discovery
-# ============================================================================
-
-def discover_artifacts(repository_root):
-    """
-    Discover all supported Python and SQL files in the repository.
-    """
-
-    artifacts = []
-
-    for path in repository_root.rglob("*"):
-
-        if not path.is_file():
-            continue
-
-        if path.suffix.lower() not in SUPPORTED_SUFFIXES:
-            continue
-
-        relative_parts = path.relative_to(
-            repository_root
-        ).parts
-
-        if any(
-            part in EXCLUDED_DIRECTORIES
-            for part in relative_parts
-        ):
-            continue
-
-        artifacts.append(
-            path
-        )
-
-    return sorted(
-        artifacts,
-        key=lambda value: str(value).lower(),
-    )
 
 
 # ============================================================================
@@ -129,7 +104,7 @@ def get_relative_path(
     artifact_path,
 ):
     """
-    Return a stable repository-relative artifact path.
+    Return a stable repository-relative path.
     """
 
     return (
@@ -139,102 +114,625 @@ def get_relative_path(
     )
 
 
-def clean_docstring(value):
+def get_line_count(content_text):
     """
-    Normalize an extracted docstring.
+    Return the number of physical lines in an artifact.
     """
 
-    if value is None:
-        return None
+    if not content_text:
+        return 0
 
-    value = str(value).strip()
-
-    if not value:
-        return None
-
-    return value
+    return len(
+        content_text.splitlines()
+    )
 
 
-def extract_docstring_section(
-    docstring,
-    heading,
+def is_test_artifact(
+    artifact_relative_path,
 ):
     """
-    Extract a simple named section from a module docstring.
+    Determine whether an artifact represents test code.
     """
 
-    if not docstring:
-        return []
+    normalized = (
+        artifact_relative_path
+        .replace("\\", "/")
+        .lower()
+    )
 
-    lines = docstring.splitlines()
+    artifact_name = (
+        Path(normalized)
+        .name
+    )
 
-    heading_lower = heading.lower()
+    return (
+        "/code_testing/" in f"/{normalized}"
+        or artifact_name.startswith("test_")
+    )
 
-    collecting = False
-    values = []
 
-    for raw_line in lines:
+# ============================================================================
+# File Discovery
+# ============================================================================
 
-        stripped = raw_line.strip()
+def discover_artifacts(
+    repository_root,
+):
+    """
+    Discover all supported Python and SQL files.
+    """
 
-        if not collecting:
+    artifacts = []
 
-            if stripped.lower() == heading_lower:
-                collecting = True
+    for path in repository_root.rglob("*"):
 
+        if not path.is_file():
             continue
 
-        if (
-            stripped.endswith(":")
-            and not stripped.startswith("-")
+        suffix = (
+            path.suffix.lower()
+        )
+
+        if suffix not in SUPPORTED_SUFFIXES:
+            continue
+
+        relative_parts = (
+            path
+            .relative_to(repository_root)
+            .parts
+        )
+
+        if any(
+            part in EXCLUDED_DIRECTORIES
+            for part in relative_parts
         ):
-            break
+            continue
+
+        artifacts.append(
+            path
+        )
+
+    return sorted(
+        artifacts,
+        key=lambda value: str(value).lower(),
+    )
+
+
+# ============================================================================
+# Documentation Parsing
+# ============================================================================
+
+def normalize_documentation_line(
+    line,
+):
+    """
+    Normalize one documentation line.
+    """
+
+    stripped = line.strip()
+
+    if stripped.startswith("-"):
+        stripped = stripped[1:].strip()
+
+    return stripped
+
+
+def parse_documentation(
+    documentation,
+):
+    """
+    Parse the AlphaOmega documentation header.
+
+    Recognizes both the new Gold Standard headings and older exclusion
+    heading variations for backward compatibility.
+    """
+
+    result = {
+        "title": None,
+        "purpose": None,
+        "responsibilities": [],
+        "verifies": [],
+        "exclusions": [],
+    }
+
+    if not documentation:
+        return result
+
+    title_lines = []
+
+    sections = {
+        "purpose": [],
+        "responsibilities": [],
+        "verifies": [],
+        "exclusions": [],
+    }
+
+    current_section = None
+
+    for raw_line in documentation.splitlines():
+
+        stripped = raw_line.strip()
 
         if not stripped:
             continue
 
-        if stripped.startswith("-"):
-            stripped = stripped[1:].strip()
-
-        values.append(
+        heading_key = (
             stripped
+            .lower()
         )
 
-    return values
-
-
-def extract_purpose(docstring):
-    """
-    Extract the Purpose section from a module docstring.
-
-    Falls back to the first meaningful docstring line.
-    """
-
-    if not docstring:
-        return None
-
-    purpose_lines = (
-        extract_docstring_section(
-            docstring,
-            "Purpose:",
+        mapped_section = (
+            DOCUMENTATION_HEADINGS.get(
+                heading_key
+            )
         )
+
+        if mapped_section:
+
+            current_section = mapped_section
+            continue
+
+        normalized = (
+            normalize_documentation_line(
+                stripped
+            )
+        )
+
+        if not normalized:
+            continue
+
+        if current_section is None:
+
+            title_lines.append(
+                normalized
+            )
+
+            continue
+
+        sections[
+            current_section
+        ].append(
+            normalized
+        )
+
+    if title_lines:
+
+        result["title"] = (
+            title_lines[0]
+        )
+
+    if sections["purpose"]:
+
+        result["purpose"] = " ".join(
+            sections["purpose"]
+        )
+
+    result["responsibilities"] = (
+        sections["responsibilities"]
     )
 
-    if purpose_lines:
-        return " ".join(
-            purpose_lines
+    result["verifies"] = (
+        sections["verifies"]
+    )
+
+    result["exclusions"] = (
+        sections["exclusions"]
+    )
+
+    return result
+
+
+def determine_documentation_status(
+    documentation,
+    parsed_documentation,
+    artifact_relative_path,
+):
+    """
+    Measure compliance with the AlphaOmega source documentation standard.
+
+    COMPLETE:
+        Title, Purpose, correct ownership/test section, and Does NOT exist.
+
+    INCOMPLETE:
+        Documentation exists but one or more required sections are missing.
+
+    MISSING:
+        No documentation header exists.
+    """
+
+    if not documentation:
+        return "MISSING"
+
+    has_title = bool(
+        parsed_documentation[
+            "title"
+        ]
+    )
+
+    has_purpose = bool(
+        parsed_documentation[
+            "purpose"
+        ]
+    )
+
+    has_exclusions = bool(
+        parsed_documentation[
+            "exclusions"
+        ]
+    )
+
+    if is_test_artifact(
+        artifact_relative_path
+    ):
+
+        has_primary_section = bool(
+            parsed_documentation[
+                "verifies"
+            ]
         )
 
-    lines = [
-        line.strip()
-        for line in docstring.splitlines()
-        if line.strip()
-    ]
+    else:
 
-    if not lines:
+        has_primary_section = bool(
+            parsed_documentation[
+                "responsibilities"
+            ]
+        )
+
+    if (
+        has_title
+        and has_purpose
+        and has_primary_section
+        and has_exclusions
+    ):
+        return "COMPLETE"
+
+    return "INCOMPLETE"
+
+
+# ============================================================================
+# SQL Documentation
+# ============================================================================
+
+def extract_sql_documentation(
+    content_text,
+):
+    """
+    Extract the leading SQL comment documentation block.
+
+    Only leading '--' comments are considered documentation.
+    """
+
+    documentation_lines = []
+    documentation_started = False
+
+    for raw_line in content_text.splitlines():
+
+        stripped = raw_line.strip()
+
+        if stripped.startswith("--"):
+
+            documentation_started = True
+
+            documentation_lines.append(
+                stripped[2:].strip()
+            )
+
+            continue
+
+        if not stripped:
+
+            if documentation_started:
+
+                documentation_lines.append(
+                    ""
+                )
+
+            continue
+
+        break
+
+    documentation = "\n".join(
+        documentation_lines
+    ).strip()
+
+    if not documentation:
         return None
 
-    return lines[0]
+    return documentation
+
+
+# ============================================================================
+# Python Constants
+# ============================================================================
+
+def collect_python_string_constants(
+    tree,
+):
+    """
+    Collect simple statically declared string constants.
+
+    This allows relationships such as:
+
+        TABLE_NAME = "scripts"
+        client.table(TABLE_NAME)
+
+    to be resolved without executing source code.
+    """
+
+    constants = {}
+
+    for node in ast.walk(tree):
+
+        if isinstance(
+            node,
+            ast.Assign,
+        ):
+
+            value = node.value
+            targets = node.targets
+
+        elif isinstance(
+            node,
+            ast.AnnAssign,
+        ):
+
+            value = node.value
+            targets = [
+                node.target
+            ]
+
+        else:
+            continue
+
+        if not (
+            isinstance(
+                value,
+                ast.Constant,
+            )
+            and isinstance(
+                value.value,
+                str,
+            )
+        ):
+            continue
+
+        for target in targets:
+
+            if isinstance(
+                target,
+                ast.Name,
+            ):
+
+                constants[
+                    target.id
+                ] = value.value
+
+            elif isinstance(
+                target,
+                ast.Attribute,
+            ):
+
+                constants[
+                    target.attr
+                ] = value.value
+
+    return constants
+
+
+def resolve_static_string(
+    node,
+    constants,
+):
+    """
+    Resolve a simple AST expression to a static string.
+
+    Supported forms:
+        "sources"
+        TABLE_NAME
+        self.TABLE_NAME
+        ClassName.TABLE_NAME
+    """
+
+    if (
+        isinstance(
+            node,
+            ast.Constant,
+        )
+        and isinstance(
+            node.value,
+            str,
+        )
+    ):
+
+        return node.value
+
+    if isinstance(
+        node,
+        ast.Name,
+    ):
+
+        return constants.get(
+            node.id
+        )
+
+    if isinstance(
+        node,
+        ast.Attribute,
+    ):
+
+        return constants.get(
+            node.attr
+        )
+
+    return None
+
+
+# ============================================================================
+# Python Import Analysis
+# ============================================================================
+
+def path_to_module_name(
+    repository_root,
+    artifact_path,
+):
+    """
+    Convert a Python artifact path into its importable module name.
+    """
+
+    relative_path = (
+        artifact_path
+        .relative_to(repository_root)
+    )
+
+    without_suffix = (
+        relative_path
+        .with_suffix("")
+    )
+
+    parts = list(
+        without_suffix.parts
+    )
+
+    if (
+        parts
+        and parts[-1] == "__init__"
+    ):
+
+        parts = parts[:-1]
+
+    return ".".join(
+        parts
+    )
+
+
+def build_python_module_map(
+    repository_root,
+    discovered_paths,
+):
+    """
+    Map importable Python module names to repository-relative files.
+    """
+
+    module_map = {}
+
+    for artifact_path in discovered_paths:
+
+        if (
+            artifact_path
+            .suffix
+            .lower()
+            != ".py"
+        ):
+            continue
+
+        module_name = (
+            path_to_module_name(
+                repository_root,
+                artifact_path,
+            )
+        )
+
+        if not module_name:
+            continue
+
+        module_map[
+            module_name
+        ] = get_relative_path(
+            repository_root,
+            artifact_path,
+        )
+
+    return module_map
+
+
+def resolve_relative_import_module(
+    current_module,
+    imported_module,
+    level,
+):
+    """
+    Resolve a Python relative import into an absolute module name.
+    """
+
+    if level == 0:
+        return imported_module or ""
+
+    current_parts = (
+        current_module
+        .split(".")
+    )
+
+    if current_parts:
+
+        current_parts = (
+            current_parts[:-1]
+        )
+
+    remove_count = (
+        level - 1
+    )
+
+    if remove_count > 0:
+
+        if remove_count <= len(
+            current_parts
+        ):
+
+            current_parts = (
+                current_parts[
+                    :-remove_count
+                ]
+            )
+
+        else:
+
+            current_parts = []
+
+    if imported_module:
+
+        current_parts.extend(
+            imported_module.split(".")
+        )
+
+    return ".".join(
+        current_parts
+    )
+
+
+def find_best_module_match(
+    candidate_module,
+    module_map,
+):
+    """
+    Resolve an imported module or sub-object to the closest repository module.
+    """
+
+    candidate = (
+        candidate_module
+        .strip(".")
+    )
+
+    while candidate:
+
+        if candidate in module_map:
+
+            return module_map[
+                candidate
+            ]
+
+        if "." not in candidate:
+            break
+
+        candidate = (
+            candidate
+            .rsplit(
+                ".",
+                1,
+            )[0]
+        )
+
+    return None
 
 
 # ============================================================================
@@ -242,46 +740,57 @@ def extract_purpose(docstring):
 # ============================================================================
 
 def analyze_python(
+    repository_root,
     artifact_path,
+    artifact_relative_path,
     content_text,
+    module_map,
 ):
     """
-    Extract structural metadata from a Python artifact using AST.
-
-    Source code is parsed but never executed.
+    Extract deterministic metadata from a Python artifact.
     """
 
-    try:
+    tree = ast.parse(
+        content_text,
+        filename=str(
+            artifact_path
+        ),
+    )
 
-        tree = ast.parse(
-            content_text,
-            filename=str(
-                artifact_path
-            ),
-        )
-
-    except SyntaxError as error:
-
-        raise RuntimeError(
-            "Python syntax could not be parsed for "
-            f"'{artifact_path}'."
-        ) from error
-
-    module_docstring = clean_docstring(
+    module_docstring = (
         ast.get_docstring(
             tree,
             clean=True,
         )
     )
 
-    classes = []
-    functions = []
-    imports = []
-    referenced_rpcs = []
+    parsed_documentation = (
+        parse_documentation(
+            module_docstring
+        )
+    )
 
-    for node in ast.walk(
-        tree
-    ):
+    constants = (
+        collect_python_string_constants(
+            tree
+        )
+    )
+
+    classes = set()
+    functions = set()
+    imports = set()
+    import_modules = set()
+    referenced_tables = set()
+    referenced_rpcs = set()
+
+    current_module = (
+        path_to_module_name(
+            repository_root,
+            artifact_path,
+        )
+    )
+
+    for node in ast.walk(tree):
 
         # ====================================================================
         # Classes
@@ -292,7 +801,7 @@ def analyze_python(
             ast.ClassDef,
         ):
 
-            classes.append(
+            classes.add(
                 node.name
             )
 
@@ -308,12 +817,12 @@ def analyze_python(
             ),
         ):
 
-            functions.append(
+            functions.add(
                 node.name
             )
 
         # ====================================================================
-        # Imports
+        # import package.module
         # ====================================================================
 
         elif isinstance(
@@ -323,36 +832,64 @@ def analyze_python(
 
             for alias in node.names:
 
-                imports.append(
+                imports.add(
                     alias.name
                 )
+
+                import_modules.add(
+                    alias.name
+                )
+
+        # ====================================================================
+        # from package.module import Object
+        # ====================================================================
 
         elif isinstance(
             node,
             ast.ImportFrom,
         ):
 
-            module_name = (
-                node.module
-                or ""
+            base_module = (
+                resolve_relative_import_module(
+                    current_module=current_module,
+                    imported_module=node.module,
+                    level=node.level,
+                )
             )
 
             for alias in node.names:
 
-                if module_name:
+                if base_module:
 
-                    imports.append(
-                        f"{module_name}.{alias.name}"
+                    imports.add(
+                        f"{base_module}.{alias.name}"
                     )
+
+                    import_modules.add(
+                        base_module
+                    )
+
+                    possible_submodule = (
+                        f"{base_module}.{alias.name}"
+                    )
+
+                    if (
+                        possible_submodule
+                        in module_map
+                    ):
+
+                        import_modules.add(
+                            possible_submodule
+                        )
 
                 else:
 
-                    imports.append(
+                    imports.add(
                         alias.name
                     )
 
         # ====================================================================
-        # Direct Supabase RPC Calls
+        # Database Table Calls
         # ====================================================================
 
         elif isinstance(
@@ -362,169 +899,165 @@ def analyze_python(
 
             function = node.func
 
+            if not isinstance(
+                function,
+                ast.Attribute,
+            ):
+                continue
+
+            # ----------------------------------------------------------------
+            # Supabase/PostgREST table access
+            # ----------------------------------------------------------------
+
             if (
-                isinstance(
-                    function,
-                    ast.Attribute,
-                )
-                and function.attr == "rpc"
+                function.attr
+                in {
+                    "table",
+                    "from_",
+                }
                 and node.args
             ):
 
-                first_argument = (
-                    node.args[0]
+                table_name = (
+                    resolve_static_string(
+                        node.args[0],
+                        constants,
+                    )
                 )
 
-                if (
-                    isinstance(
-                        first_argument,
-                        ast.Constant,
-                    )
-                    and isinstance(
-                        first_argument.value,
-                        str,
-                    )
-                ):
+                if table_name:
 
-                    referenced_rpcs.append(
-                        first_argument.value
+                    referenced_tables.add(
+                        table_name
                     )
 
-    # ========================================================================
-    # RPC_NAME Constants
-    # ========================================================================
-
-    for node in ast.walk(
-        tree
-    ):
-
-        if isinstance(
-            node,
-            ast.Assign,
-        ):
-
-            targets = (
-                node.targets
-            )
-
-            value = (
-                node.value
-            )
-
-        elif isinstance(
-            node,
-            ast.AnnAssign,
-        ):
-
-            targets = [
-                node.target
-            ]
-
-            value = (
-                node.value
-            )
-
-        else:
-
-            continue
-
-        for target in targets:
+            # ----------------------------------------------------------------
+            # Supabase RPC access
+            # ----------------------------------------------------------------
 
             if (
-                isinstance(
-                    target,
-                    ast.Name,
-                )
-                and target.id == "RPC_NAME"
-                and isinstance(
-                    value,
-                    ast.Constant,
-                )
-                and isinstance(
-                    value.value,
-                    str,
-                )
+                function.attr == "rpc"
+                and node.args
             ):
 
-                referenced_rpcs.append(
-                    value.value
+                rpc_name = (
+                    resolve_static_string(
+                        node.args[0],
+                        constants,
+                    )
                 )
 
-    responsibilities = (
-        extract_docstring_section(
-            module_docstring,
-            "Responsibilities:",
+                if rpc_name:
+
+                    referenced_rpcs.add(
+                        rpc_name
+                    )
+
+    referenced_scripts = set()
+
+    for imported_module in (
+        import_modules
+    ):
+
+        referenced_script = (
+            find_best_module_match(
+                imported_module,
+                module_map,
+            )
+        )
+
+        if not referenced_script:
+            continue
+
+        if (
+            referenced_script
+            == artifact_relative_path
+        ):
+            continue
+
+        referenced_scripts.add(
+            referenced_script
+        )
+
+    documentation_status = (
+        determine_documentation_status(
+            documentation=module_docstring,
+            parsed_documentation=parsed_documentation,
+            artifact_relative_path=artifact_relative_path,
         )
     )
 
-    exclusions = []
-
-    for heading in (
-        "This module does NOT:",
-        "This repository does not:",
-        "This utility does NOT:",
-    ):
-
-        exclusions.extend(
-            extract_docstring_section(
-                module_docstring,
-                heading,
-            )
-        )
-
     return {
+        "module_docstring":
+            module_docstring,
+
         "purpose":
-            extract_purpose(
-                module_docstring
-            ),
+            parsed_documentation[
+                "purpose"
+            ],
 
         "responsibilities":
             sorted(
                 set(
-                    responsibilities
+                    parsed_documentation[
+                        "responsibilities"
+                    ]
+                )
+            ),
+
+        "verifies":
+            sorted(
+                set(
+                    parsed_documentation[
+                        "verifies"
+                    ]
                 )
             ),
 
         "exclusions":
             sorted(
                 set(
-                    exclusions
+                    parsed_documentation[
+                        "exclusions"
+                    ]
                 )
             ),
 
         "classes":
             sorted(
-                set(
-                    classes
-                )
+                classes
             ),
 
         "functions":
             sorted(
-                set(
-                    functions
-                )
+                functions
             ),
 
         "imports":
             sorted(
-                set(
-                    imports
-                )
+                imports
             ),
 
-        "sql_functions":
-            [],
+        "referenced_scripts":
+            sorted(
+                referenced_scripts
+            ),
 
         "referenced_tables":
-            [],
+            sorted(
+                referenced_tables
+            ),
 
         "referenced_rpcs":
             sorted(
-                set(
-                    referenced_rpcs
-                )
+                referenced_rpcs
             ),
+
+        "defined_rpcs":
+            [],
+
+        "documentation_status":
+            documentation_status,
     }
 
 
@@ -532,24 +1065,42 @@ def analyze_python(
 # SQL Analysis
 # ============================================================================
 
-def analyze_sql(content_text):
+def strip_sql_comments(
+    content_text,
+):
     """
-    Extract conservative structural metadata from a SQL artifact.
-
-    This intentionally does not attempt to be a complete SQL parser.
+    Remove SQL comments for relationship detection.
     """
 
-    sql_functions = set()
-    referenced_tables = set()
+    without_block_comments = re.sub(
+        r"/\*.*?\*/",
+        " ",
+        content_text,
+        flags=re.DOTALL,
+    )
 
-    # ========================================================================
-    # SQL Function Definitions
-    # ========================================================================
+    without_line_comments = re.sub(
+        r"--.*?$",
+        " ",
+        without_block_comments,
+        flags=re.MULTILINE,
+    )
 
-    function_pattern = re.compile(
+    return without_line_comments
+
+
+def find_sql_defined_rpcs(
+    content_text,
+):
+    """
+    Detect SQL function definitions.
+    """
+
+    pattern = re.compile(
         r"""
         \bCREATE
-        \s+(?:OR\s+REPLACE\s+)?
+        \s+
+        (?:OR\s+REPLACE\s+)?
         FUNCTION
         \s+
         (?:(?:public)\.)?
@@ -558,19 +1109,30 @@ def analyze_sql(content_text):
         re.IGNORECASE | re.VERBOSE,
     )
 
-    for match in function_pattern.finditer(
-        content_text
-    ):
-
-        sql_functions.add(
+    return sorted(
+        {
             match.group(1)
+            for match in pattern.finditer(
+                content_text
+            )
+        }
+    )
+
+
+def find_sql_referenced_tables(
+    content_text,
+):
+    """
+    Detect tables directly touched or defined by SQL.
+    """
+
+    cleaned_sql = (
+        strip_sql_comments(
+            content_text
         )
+    )
 
-    # ========================================================================
-    # Referenced Tables
-    # ========================================================================
-
-    table_pattern = re.compile(
+    pattern = re.compile(
         r"""
         \b
         (?:
@@ -583,67 +1145,112 @@ def analyze_sql(content_text):
             UPDATE
             |
             DELETE\s+FROM
+            |
+            ALTER\s+TABLE
+            |
+            CREATE\s+TABLE
+            |
+            DROP\s+TABLE
+            |
+            TRUNCATE(?:\s+TABLE)?
         )
         \s+
+        (?:IF\s+(?:NOT\s+)?EXISTS\s+)?
         (?:(?:public)\.)?
         ([A-Za-z_][A-Za-z0-9_]*)
         """,
         re.IGNORECASE | re.VERBOSE,
     )
 
-    for match in table_pattern.finditer(
-        content_text
-    ):
-
-        referenced_tables.add(
+    return sorted(
+        {
             match.group(1)
-        )
-
-    # ========================================================================
-    # Leading SQL Comments
-    # ========================================================================
-
-    purpose = None
-    comment_lines = []
-
-    for line in content_text.splitlines():
-
-        stripped = line.strip()
-
-        if stripped.startswith(
-            "--"
-        ):
-
-            comment_text = (
-                stripped[2:]
-                .strip()
+            for match in pattern.finditer(
+                cleaned_sql
             )
+        }
+    )
 
-            if comment_text:
 
-                comment_lines.append(
-                    comment_text
-                )
+def analyze_sql(
+    artifact_relative_path,
+    content_text,
+):
+    """
+    Extract deterministic metadata from a SQL artifact.
+    """
 
-        elif stripped:
-
-            break
-
-    if comment_lines:
-
-        purpose = " ".join(
-            comment_lines
+    documentation = (
+        extract_sql_documentation(
+            content_text
         )
+    )
+
+    parsed_documentation = (
+        parse_documentation(
+            documentation
+        )
+    )
+
+    defined_rpcs = (
+        find_sql_defined_rpcs(
+            content_text
+        )
+    )
+
+    referenced_tables = (
+        find_sql_referenced_tables(
+            content_text
+        )
+    )
+
+    documentation_status = (
+        determine_documentation_status(
+            documentation=documentation,
+            parsed_documentation=parsed_documentation,
+            artifact_relative_path=artifact_relative_path,
+        )
+    )
 
     return {
+        # The column is named module_docstring because Python is the primary
+        # implementation language. For SQL it stores the equivalent leading
+        # documentation header so the full human-authored contract is still
+        # available from one inventory field.
+        "module_docstring":
+            documentation,
+
         "purpose":
-            purpose,
+            parsed_documentation[
+                "purpose"
+            ],
 
         "responsibilities":
-            [],
+            sorted(
+                set(
+                    parsed_documentation[
+                        "responsibilities"
+                    ]
+                )
+            ),
+
+        "verifies":
+            sorted(
+                set(
+                    parsed_documentation[
+                        "verifies"
+                    ]
+                )
+            ),
 
         "exclusions":
-            [],
+            sorted(
+                set(
+                    parsed_documentation[
+                        "exclusions"
+                    ]
+                )
+            ),
 
         "classes":
             [],
@@ -654,81 +1261,96 @@ def analyze_sql(content_text):
         "imports":
             [],
 
-        "sql_functions":
-            sorted(
-                sql_functions
-            ),
+        "referenced_scripts":
+            [],
 
         "referenced_tables":
-            sorted(
-                referenced_tables
-            ),
+            referenced_tables,
 
         "referenced_rpcs":
             [],
+
+        "defined_rpcs":
+            defined_rpcs,
+
+        "documentation_status":
+            documentation_status,
     }
+
+
+def find_sql_referenced_rpcs(
+    content_text,
+    known_rpcs,
+    defined_rpcs,
+):
+    """
+    Detect calls from SQL to RPC/functions defined elsewhere in the repository.
+
+    Only known AlphaOmega SQL functions are considered. This avoids treating
+    normal PostgreSQL built-in functions as repository dependencies.
+    """
+
+    cleaned_sql = (
+        strip_sql_comments(
+            content_text
+        )
+    )
+
+    own_definitions = set(
+        defined_rpcs
+    )
+
+    referenced = set()
+
+    for rpc_name in known_rpcs:
+
+        if rpc_name in own_definitions:
+            continue
+
+        pattern = re.compile(
+            rf"""
+            \b
+            (?:public\.)?
+            {re.escape(rpc_name)}
+            \s*
+            \(
+            """,
+            re.IGNORECASE | re.VERBOSE,
+        )
+
+        if pattern.search(
+            cleaned_sql
+        ):
+
+            referenced.add(
+                rpc_name
+            )
+
+    return sorted(
+        referenced
+    )
 
 
 # ============================================================================
 # Artifact Analysis
 # ============================================================================
 
-def analyze_artifact(
+def build_base_record(
     repository_root,
     artifact_path,
+    content_bytes,
+    content_text,
+    scanned_at,
 ):
     """
-    Build one scripts-table record from one repository artifact.
+    Build metadata available regardless of parser success.
     """
-
-    content_bytes = (
-        artifact_path
-        .read_bytes()
-    )
-
-    try:
-
-        content_text = (
-            content_bytes
-            .decode(
-                "utf-8"
-            )
-        )
-
-    except UnicodeDecodeError:
-
-        content_text = (
-            content_bytes
-            .decode(
-                "utf-8-sig"
-            )
-        )
 
     suffix = (
         artifact_path
         .suffix
         .lower()
     )
-
-    if suffix == ".py":
-
-        analysis = analyze_python(
-            artifact_path,
-            content_text,
-        )
-
-    elif suffix == ".sql":
-
-        analysis = analyze_sql(
-            content_text
-        )
-
-    else:
-
-        raise ValueError(
-            "Unsupported artifact type: "
-            f"'{artifact_path}'."
-        )
 
     return {
         "artifact_path":
@@ -746,58 +1368,269 @@ def analyze_artifact(
             ],
 
         "purpose":
-            analysis[
-                "purpose"
-            ],
+            None,
 
         "responsibilities":
-            analysis[
-                "responsibilities"
-            ],
+            [],
+
+        "verifies":
+            [],
 
         "exclusions":
-            analysis[
-                "exclusions"
-            ],
+            [],
 
         "classes":
-            analysis[
-                "classes"
-            ],
+            [],
 
         "functions":
-            analysis[
-                "functions"
-            ],
+            [],
 
         "imports":
-            analysis[
-                "imports"
-            ],
+            [],
+
+        "referenced_scripts":
+            [],
 
         "sql_functions":
-            analysis[
-                "sql_functions"
-            ],
+            [],
 
         "referenced_tables":
-            analysis[
-                "referenced_tables"
-            ],
+            [],
 
         "referenced_rpcs":
-            analysis[
-                "referenced_rpcs"
-            ],
+            [],
+
+        "defined_rpcs":
+            [],
+
+        "module_docstring":
+            None,
 
         "content_hash":
             calculate_hash(
                 content_bytes
             ),
 
+        "line_count":
+            get_line_count(
+                content_text
+            ),
+
+        "scan_error":
+            None,
+
+        "documentation_status":
+            "MISSING",
+
+        "last_scanned_at":
+            scanned_at,
+
         "is_active":
             True,
     }
+
+
+def analyze_artifact(
+    repository_root,
+    artifact_path,
+    module_map,
+    scanned_at,
+):
+    """
+    Analyze one artifact without allowing parser failures to stop the scan.
+    """
+
+    content_bytes = (
+        artifact_path
+        .read_bytes()
+    )
+
+    decoding_error = None
+
+    try:
+
+        content_text = (
+            content_bytes
+            .decode(
+                "utf-8-sig"
+            )
+        )
+
+    except UnicodeDecodeError as error:
+
+        decoding_error = (
+            f"{type(error).__name__}: {error}"
+        )
+
+        content_text = (
+            content_bytes
+            .decode(
+                "utf-8",
+                errors="replace",
+            )
+        )
+
+    record = (
+        build_base_record(
+            repository_root=repository_root,
+            artifact_path=artifact_path,
+            content_bytes=content_bytes,
+            content_text=content_text,
+            scanned_at=scanned_at,
+        )
+    )
+
+    artifact_relative_path = (
+        record[
+            "artifact_path"
+        ]
+    )
+
+    suffix = (
+        artifact_path
+        .suffix
+        .lower()
+    )
+
+    try:
+
+        if suffix == ".py":
+
+            analysis = (
+                analyze_python(
+                    repository_root=repository_root,
+                    artifact_path=artifact_path,
+                    artifact_relative_path=artifact_relative_path,
+                    content_text=content_text,
+                    module_map=module_map,
+                )
+            )
+
+        elif suffix == ".sql":
+
+            analysis = (
+                analyze_sql(
+                    artifact_relative_path=artifact_relative_path,
+                    content_text=content_text,
+                )
+            )
+
+        else:
+
+            raise ValueError(
+                "Unsupported artifact type: "
+                f"{artifact_path}"
+            )
+
+        record.update(
+            analysis
+        )
+
+    except Exception as error:
+
+        record[
+            "scan_error"
+        ] = (
+            f"{type(error).__name__}: {error}"
+        )
+
+    if decoding_error:
+
+        if record[
+            "scan_error"
+        ]:
+
+            record[
+                "scan_error"
+            ] = (
+                f"{decoding_error}; "
+                f"{record['scan_error']}"
+            )
+
+        else:
+
+            record[
+                "scan_error"
+            ] = decoding_error
+
+    # Transient content used during second-pass SQL dependency resolution.
+    # It is removed before persistence.
+    record[
+        "_content_text"
+    ] = content_text
+
+    return record
+
+
+# ============================================================================
+# Second-Pass Relationship Analysis
+# ============================================================================
+
+def enrich_sql_rpc_relationships(
+    records,
+):
+    """
+    Resolve SQL-to-SQL RPC relationships after all function definitions
+    have been discovered.
+    """
+
+    known_rpcs = set()
+
+    for record in records:
+
+        known_rpcs.update(
+            record[
+                "defined_rpcs"
+            ]
+        )
+
+    for record in records:
+
+        if (
+            record[
+                "artifact_type"
+            ]
+            != "SQL"
+        ):
+            continue
+
+        if record[
+            "scan_error"
+        ]:
+            continue
+
+        content_text = (
+            record[
+                "_content_text"
+            ]
+        )
+
+        record[
+            "referenced_rpcs"
+        ] = (
+            find_sql_referenced_rpcs(
+                content_text=content_text,
+                known_rpcs=known_rpcs,
+                defined_rpcs=record[
+                    "defined_rpcs"
+                ],
+            )
+        )
+
+
+def remove_transient_fields(
+    records,
+):
+    """
+    Remove analysis-only fields before database persistence.
+    """
+
+    for record in records:
+
+        record.pop(
+            "_content_text",
+            None,
+        )
 
 
 # ============================================================================
@@ -835,30 +1668,46 @@ def load_existing_records(
     }
 
 
-def upsert_artifact(
+def upsert_records(
     client,
-    record,
+    records,
 ):
     """
-    Insert or update one scripts inventory record.
+    Upsert inventory records in controlled batches.
+
+    All observed artifacts are refreshed, even if their source hash has not
+    changed, because scanner-derived metadata can improve independently of
+    source-code changes.
     """
 
-    (
-        client
-        .table(
-            TABLE_NAME
+    for start_index in range(
+        0,
+        len(records),
+        UPSERT_BATCH_SIZE,
+    ):
+
+        batch = records[
+            start_index:
+            start_index + UPSERT_BATCH_SIZE
+        ]
+
+        (
+            client
+            .table(
+                TABLE_NAME
+            )
+            .upsert(
+                batch,
+                on_conflict="artifact_path",
+            )
+            .execute()
         )
-        .upsert(
-            record,
-            on_conflict="artifact_path",
-        )
-        .execute()
-    )
 
 
 def deactivate_missing_artifact(
     client,
     artifact_path,
+    scanned_at,
 ):
     """
     Mark a previously known artifact inactive.
@@ -873,6 +1722,9 @@ def deactivate_missing_artifact(
             {
                 "is_active":
                     False,
+
+                "last_scanned_at":
+                    scanned_at,
             }
         )
         .eq(
@@ -884,6 +1736,40 @@ def deactivate_missing_artifact(
 
 
 # ============================================================================
+# Inventory Classification
+# ============================================================================
+
+def classify_record(
+    record,
+    existing,
+):
+    """
+    Classify one observed artifact relative to the previous inventory.
+    """
+
+    if existing is None:
+        return "new"
+
+    if not existing.get(
+        "is_active",
+        True,
+    ):
+        return "reactivated"
+
+    if (
+        existing.get(
+            "content_hash"
+        )
+        != record[
+            "content_hash"
+        ]
+    ):
+        return "changed"
+
+    return "unchanged"
+
+
+# ============================================================================
 # Inventory Refresh
 # ============================================================================
 
@@ -892,12 +1778,29 @@ def refresh_inventory(
     repository_root,
 ):
     """
-    Refresh the complete development script inventory.
+    Refresh the complete AlphaOmega development implementation inventory.
     """
+
+    scanned_at = (
+        datetime.now(
+            timezone.utc
+        )
+        .isoformat()
+    )
 
     discovered_paths = (
         discover_artifacts(
             repository_root
+        )
+    )
+
+    # Discovery completed successfully before any deactivation decisions.
+    # This prevents a partial traversal from falsely marking artifacts absent.
+
+    module_map = (
+        build_python_module_map(
+            repository_root,
+            discovered_paths,
         )
     )
 
@@ -907,21 +1810,38 @@ def refresh_inventory(
         )
     )
 
-    observed_artifact_paths = set()
+    records = []
 
-    new_count = 0
-    changed_count = 0
-    unchanged_count = 0
-    reactivated_count = 0
-    deactivated_count = 0
+    counts = {
+        "observed": 0,
+        "new": 0,
+        "changed": 0,
+        "unchanged": 0,
+        "reactivated": 0,
+        "deactivated": 0,
+        "scan_errors": 0,
+        "documentation_complete": 0,
+        "documentation_incomplete": 0,
+        "documentation_missing": 0,
+    }
+
+    observed_artifact_paths = set()
 
     for artifact_path in (
         discovered_paths
     ):
 
-        record = analyze_artifact(
-            repository_root,
-            artifact_path,
+        record = (
+            analyze_artifact(
+                repository_root=repository_root,
+                artifact_path=artifact_path,
+                module_map=module_map,
+                scanned_at=scanned_at,
+            )
+        )
+
+        records.append(
+            record
         )
 
         artifact_relative_path = (
@@ -940,70 +1860,76 @@ def refresh_inventory(
             )
         )
 
-        # ====================================================================
-        # New
-        # ====================================================================
-
-        if existing is None:
-
-            upsert_artifact(
-                client,
+        classification = (
+            classify_record(
                 record,
+                existing,
             )
+        )
 
-            new_count += 1
+        counts[
+            classification
+        ] += 1
 
-            continue
+    # Second pass requires a complete view of discovered SQL definitions.
 
-        # ====================================================================
-        # Reactivated
-        # ====================================================================
+    enrich_sql_rpc_relationships(
+        records
+    )
 
-        if not existing.get(
-            "is_active",
-            True,
-        ):
+    remove_transient_fields(
+        records
+    )
 
-            upsert_artifact(
-                client,
-                record,
-            )
+    # Documentation and parser statistics are calculated after enrichment.
 
-            reactivated_count += 1
+    for record in records:
 
-            continue
+        counts[
+            "observed"
+        ] += 1
 
-        # ====================================================================
-        # Changed
-        # ====================================================================
+        if record[
+            "scan_error"
+        ]:
 
-        if (
-            existing.get(
-                "content_hash"
-            )
-            != record[
-                "content_hash"
+            counts[
+                "scan_errors"
+            ] += 1
+
+        documentation_status = (
+            record[
+                "documentation_status"
             ]
-        ):
+        )
 
-            upsert_artifact(
-                client,
-                record,
-            )
+        if documentation_status == "COMPLETE":
 
-            changed_count += 1
+            counts[
+                "documentation_complete"
+            ] += 1
 
-            continue
+        elif documentation_status == "INCOMPLETE":
 
-        # ====================================================================
-        # Unchanged
-        # ====================================================================
+            counts[
+                "documentation_incomplete"
+            ] += 1
 
-        unchanged_count += 1
+        else:
 
-    # ========================================================================
-    # Missing / Inactive
-    # ========================================================================
+            counts[
+                "documentation_missing"
+            ] += 1
+
+    # Persist all current observations.
+
+    upsert_records(
+        client,
+        records,
+    )
+
+    # Deactivate only after complete filesystem discovery and successful
+    # current-record persistence.
 
     for (
         artifact_path,
@@ -1023,80 +1949,40 @@ def refresh_inventory(
             continue
 
         deactivate_missing_artifact(
-            client,
-            artifact_path,
+            client=client,
+            artifact_path=artifact_path,
+            scanned_at=scanned_at,
         )
 
-        deactivated_count += 1
+        counts[
+            "deactivated"
+        ] += 1
 
-    return {
-        "observed":
-            len(
-                discovered_paths
-            ),
-
-        "new":
-            new_count,
-
-        "changed":
-            changed_count,
-
-        "unchanged":
-            unchanged_count,
-
-        "reactivated":
-            reactivated_count,
-
-        "deactivated":
-            deactivated_count,
-    }
+    return counts
 
 
 # ============================================================================
-# Main
+# Console Output
 # ============================================================================
 
-def main():
+def print_results(
+    result,
+):
     """
-    Execute the development script inventory refresh.
+    Print the inventory refresh result.
     """
-
-    repository_root = (
-        get_repository_root()
-    )
-
-    print(
-        "AlphaOmega Script Inventory Refresh"
-    )
-
-    print(
-        "Repository:",
-        repository_root,
-    )
-
-    credential_provider = (
-        LocalCredentialProvider()
-    )
-
-    database_connection = (
-        DatabaseConnection(
-            credential_provider
-        )
-    )
-
-    client = (
-        database_connection
-        .connect()
-    )
-
-    result = refresh_inventory(
-        client=client,
-        repository_root=repository_root,
-    )
 
     print()
     print(
         "Refresh complete"
+    )
+
+    print()
+    print(
+        "Repository Inventory"
+    )
+    print(
+        "--------------------"
     )
 
     print(
@@ -1139,6 +2025,99 @@ def main():
         result[
             "deactivated"
         ],
+    )
+
+    print()
+    print(
+        "Documentation"
+    )
+    print(
+        "-------------"
+    )
+
+    print(
+        "Complete:",
+        result[
+            "documentation_complete"
+        ],
+    )
+
+    print(
+        "Incomplete:",
+        result[
+            "documentation_incomplete"
+        ],
+    )
+
+    print(
+        "Missing:",
+        result[
+            "documentation_missing"
+        ],
+    )
+
+    print()
+    print(
+        "Analysis"
+    )
+    print(
+        "--------"
+    )
+
+    print(
+        "Scan errors:",
+        result[
+            "scan_errors"
+        ],
+    )
+
+
+# ============================================================================
+# Main
+# ============================================================================
+
+def main():
+    """
+    Execute the AlphaOmega development implementation inventory refresh.
+    """
+
+    repository_root = (
+        get_repository_root()
+    )
+
+    print(
+        "AlphaOmega Script Inventory Refresh"
+    )
+
+    print(
+        "Repository:",
+        repository_root,
+    )
+
+    credential_provider = (
+        LocalCredentialProvider()
+    )
+
+    database_connection = (
+        DatabaseConnection(
+            credential_provider
+        )
+    )
+
+    client = (
+        database_connection
+        .connect()
+    )
+
+    result = (
+        refresh_inventory(
+            client=client,
+            repository_root=repository_root,
+        )
+    )
+
+    print_results(
+        result
     )
 
 
