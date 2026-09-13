@@ -1,28 +1,23 @@
 """
-File:
-    source_browsing_service.py
+AlphaOmega Source Browsing Service
 
 Purpose:
     Provides the application-facing capability for browsing registered
-    AlphaOmega Sources and their persisted Source Container hierarchy.
+    Sources and their persisted Source Container hierarchy.
 
-The SourceBrowsingService owns:
-    - Listing enabled registered Sources.
-    - Validating a requested Source exists.
-    - Validating a requested Source is enabled.
-    - Retrieving active persisted Source Containers.
-    - Constructing the application-facing Container hierarchy.
+Responsibilities:
+    - List enabled registered Sources.
+    - Validate that a requested Source exists and is enabled.
+    - Retrieve active persisted Source Containers for a Source.
+    - Construct the application-facing Source Container hierarchy.
+    - Expose AlphaOmega Source and Source Container identities to callers.
 
-The SourceBrowsingService does NOT:
+Does NOT:
     - Access the database directly.
     - Communicate with a Source of Truth.
-    - Enumerate Source Containers.
-    - Refresh the Source Container Catalog.
+    - Enumerate or refresh Source Containers.
     - Synchronize content.
-    - Determine content synchronization state.
-    - Create Processing Jobs.
-    - Create Synchronization Runs.
-    - Execute the synchronization pipeline.
+    - Create Processing Jobs or Synchronization Runs.
     - Perform UI presentation.
 """
 

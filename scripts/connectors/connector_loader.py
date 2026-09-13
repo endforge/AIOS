@@ -1,8 +1,20 @@
 """
-File: connector_loader.py
+AlphaOmega Connector Loader
 
 Purpose:
     Loads the appropriate connector for a requested Source of Truth.
+
+Responsibilities:
+    - Map supported Source of Truth names to their connector implementation.
+    - Return a GraphConnector for supported OneDrive requests.
+    - Return a GraphConnector for supported OneNote requests.
+    - Reject unsupported Source of Truth names.
+
+Does NOT:
+    - Execute the selected connector.
+    - Connect to Microsoft Graph.
+    - Retrieve source objects.
+    - Perform synchronization processing.
 """
 
 from scripts.connectors.graph_connector import GraphConnector

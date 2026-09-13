@@ -1,3 +1,24 @@
+"""
+OneDrive AlphaOmega Path Test
+
+Purpose:
+    Examines the live OneDrive container hierarchy associated with the
+    AlphaOmega subtree.
+
+Verifies:
+    - Complete OneDrive container observations pass validation.
+    - Parent chains can be reconstructed from observed container identities.
+    - The AlphaOmega subtree can be located in the observed hierarchy.
+    - Containers belonging to the AlphaOmega subtree can be counted.
+
+Does NOT:
+    - Persist Source Containers.
+    - Modify OneDrive.
+    - Synchronize OneDrive content.
+    - Create Knowledge Objects.
+"""
+
+
 from scripts.connectors.ms_graph.onedrive_container_enumerator import (
     OneDriveContainerEnumerator,
 )

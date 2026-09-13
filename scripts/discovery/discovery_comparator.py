@@ -1,9 +1,23 @@
 """
-File: discovery_comparator.py
+AlphaOmega Discovery Comparator
 
 Purpose:
-    Compares trusted Translator facts against an existing
-    canonical Knowledge Object for Discovery.
+    Compares canonical translated source facts with persisted Knowledge Object
+    facts to determine whether synchronization-relevant metadata has changed.
+
+Responsibilities:
+    - Compare the synchronization fields owned by Discovery.
+    - Identify factual differences between translated source state and
+      persisted Knowledge Object state.
+    - Return comparison results used by Discovery to distinguish MODIFIED
+      from UNCHANGED records.
+
+Does NOT:
+    - Determine whether a source object is NEW.
+    - Retrieve Knowledge Objects.
+    - Retrieve source content.
+    - Perform Extraction or Load.
+    - Persist synchronization results.
 """
 
 from datetime import datetime

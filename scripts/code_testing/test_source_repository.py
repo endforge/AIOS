@@ -1,13 +1,20 @@
 """
-File: test_source_repository.py
+Source Repository Test
 
 Purpose:
-    Verifies authenticated Source lookup through SourceRepository.
+    Validates authenticated Source lookup through SourceRepository.
 
-Tests:
-    1. Existing OneNote Source resolves to its AlphaOmega source_id.
-    2. Existing OneDrive Source resolves to its AlphaOmega source_id.
-    3. Unknown Source returns None.
+Verifies:
+    - A registered Source can be resolved by name.
+    - A registered Source can be retrieved by AlphaOmega identity.
+    - Enabled Sources can be retrieved through the repository.
+    - Repository access operates through the authenticated database boundary.
+
+Does NOT:
+    - Register or modify Sources.
+    - Connect to a Source of Truth.
+    - Refresh Source Containers.
+    - Execute synchronization.
 """
 
 from common.security.local_credential_provider import LocalCredentialProvider

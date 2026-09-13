@@ -1,11 +1,22 @@
 """
 AlphaOmega Database Connection
 
-Creates an authenticated Supabase client for AlphaOmega repository
-infrastructure.
+Purpose:
+    Establishes authenticated access to the AlphaOmega Supabase database.
 
-Supabase-specific authentication remains inside the database infrastructure.
-Synchronization stages do not receive or manage authentication credentials.
+Responsibilities:
+    - Retrieve required database credentials through the configured
+      CredentialProvider.
+    - Create the Supabase database client.
+    - Provide the established client to database repositories and services.
+    - Keep credential retrieval behind the credential-provider boundary.
+
+Does NOT:
+    - Store credentials.
+    - Implement repository operations.
+    - Determine synchronization behavior.
+    - Execute synchronization stages.
+    - Own database schema definitions.
 """
 
 import os

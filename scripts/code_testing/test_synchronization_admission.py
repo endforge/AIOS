@@ -1,12 +1,27 @@
 """
-File:
-    test_synchronization_admission.py
+Synchronization Admission Test
 
 Purpose:
-    Perform a controlled live database test of persisted
+    Performs a controlled live database test of persisted
     SynchronizationRequest admission.
 
-This test is read-only.
+Verifies:
+    - A requested Source exists in the persisted Source catalog.
+    - The requested Source is enabled.
+    - A requested Source Container exists.
+    - The Source Container is active.
+    - The Source Container belongs to the requested Source.
+    - Successful admission returns the persisted identities required by later
+      synchronization capabilities.
+    - OneDrive and OneNote requests can pass persisted admission.
+
+Does NOT:
+    - Communicate with a Source of Truth.
+    - Detect synchronization overlap.
+    - Reserve synchronization execution.
+    - Create Processing Jobs or Synchronization Runs.
+    - Invoke SynchronizationOrchestrator.
+    - Modify the AlphaOmega database.
 """
 
 

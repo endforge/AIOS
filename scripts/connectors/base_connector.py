@@ -1,8 +1,20 @@
 """
-File: base_connector.py
+AlphaOmega Base Connector
 
 Purpose:
-    Defines the contract all connectors must follow.
+    Defines the contract that all AlphaOmega connectors must follow.
+
+Responsibilities:
+    - Define the common Connector interface.
+    - Require connectors to implement the run operation.
+    - Establish ConnectorSection as the completed output of Connector
+      processing.
+
+Does NOT:
+    - Connect to a specific Source of Truth.
+    - Implement source-specific retrieval behavior.
+    - Translate retrieved source objects.
+    - Perform Discovery, Extraction, or Load processing.
 """
 
 

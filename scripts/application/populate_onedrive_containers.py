@@ -1,24 +1,24 @@
 """
-Controlled initial population of the OneDrive AlphaOmega
-Source Container subtree.
+Controlled OneDrive Source Container Population
 
-This Lab 8 bootstrap operation measures:
+Purpose:
+    Performs controlled population of the AlphaOmega OneDrive Source
+    Container subtree.
 
-- Complete OneDrive enumeration time.
-- Observation validation time.
-- Selected subtree size.
-- JSON persistence payload size.
-- PostgreSQL persistence time.
-- Database verification time.
-- Total execution time.
+Responsibilities:
+    - Enumerate a complete OneDrive container observation.
+    - Validate the complete observation before selection.
+    - Select the AlphaOmega subtree from the observed hierarchy.
+    - Create a Processing Job for the controlled population.
+    - Persist the selected Source Containers through the approved database
+      operation.
+    - Report population measurements and results.
 
-The operation does not:
-
-- Persist the complete OneDrive Container catalog.
-- Synchronize OneDrive content.
-- Create Knowledge Objects.
-- Mark Source Containers inactive.
-- Perform normal Source Container Refresh reconciliation.
+Does NOT:
+    - Perform ongoing Source Container Refresh.
+    - Treat partial enumeration as proof of absence.
+    - Synchronize OneDrive file content.
+    - Create Knowledge Objects.
 """
 
 import json

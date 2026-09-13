@@ -1,48 +1,30 @@
 """
-File: test_graph_pipeline_sample.py
+Microsoft Graph Connector and Translator Sample Test
 
 Purpose:
-    Deterministic Connector -> Synchronization Correlation -> Translator
-    regression test using small, known Microsoft Graph datasets.
+    Provides a deterministic Connector to synchronization correlation to
+    Translator regression test using small, known Microsoft Graph datasets.
 
-OneDrive target:
-    Writings and every descendant beneath Writings.
-
-OneNote targets:
-    Games -> Minecraft
-    Mimic's Tavern -> Homebrew
-
-The OneNote targets deliberately exercise multiple hierarchy patterns:
-
-    Standard contiguous hierarchy:
-        My World Realms - Hoesing and Park     level 0
-            Blueprints                         level 1
-            Storage Build                      level 1
-            Coordinates                        level 1
-            Super GreenHouse Tower             level 1
-
-    Non-contiguous hierarchy:
-        Selune Armor                            level 0
-            Armor                               level 2
-
-The test validates:
-    - Retrieval completeness within the selected test scope.
+Verifies:
+    - Selected OneDrive and OneNote test scopes are retrieved completely.
     - ConnectorSection remains locked.
-    - Connector raw objects are not modified by Synchronization.
-    - Every Connector object receives one correlation UUID.
-    - Correlation UUIDs are valid.
-    - Correlation UUIDs are unique within the batch.
+    - Connector raw objects remain unchanged by synchronization preparation.
+    - Every Connector object receives one valid and unique correlation UUID.
     - TranslatorRecord preserves its assigned correlation UUID.
-    - Names.
-    - Canonical object types.
-    - Source object IDs.
-    - Immediate parent IDs.
-    - Source hierarchy paths.
-    - Created/modified timestamps.
+    - Names and canonical object types are translated correctly.
+    - Source object and immediate parent identities are preserved.
+    - Source hierarchy paths are preserved.
+    - Created and modified timestamps are preserved.
     - Blank OneNote page titles become Untitled.
-    - Standard OneNote child-page relationships.
-    - Non-contiguous OneNote child-page relationships.
-    - Deep OneDrive traversal.
+    - Standard and non-contiguous OneNote child-page relationships are
+      preserved.
+    - Deep OneDrive traversal is preserved.
+
+Does NOT:
+    - Enumerate the complete OneDrive or complete OneNote Source of Truth.
+    - Perform Discovery.
+    - Perform Extraction or Load.
+    - Persist Knowledge Objects.
 """
 
 from collections import Counter

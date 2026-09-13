@@ -1,13 +1,22 @@
 """
-File: test_discovery_lock_enforcement.py
+Discovery Lock Enforcement Test
 
 Purpose:
-    Verifies that a completed DiscoverySection is actually immutable.
+    Validates synchronization section locking at the Discovery boundary.
 
-Tests:
-    1. DiscoverySection reports itself as locked.
-    2. Existing attributes cannot be modified after locking.
-    3. Frozen Discovery record collection cannot be appended to.
+Verifies:
+    - Discovery accepts the required completed Translator input.
+    - Completed synchronization sections cannot be modified after locking.
+    - Attempts to violate the section-lock contract raise the expected
+      synchronization exception.
+    - Discovery preserves the synchronization framework's stage ownership
+      boundary.
+
+Does NOT:
+    - Modify live source content.
+    - Perform Extraction or Load.
+    - Test Connector behavior.
+    - Bypass synchronization section locking.
 """
 
 from datetime import datetime, timezone

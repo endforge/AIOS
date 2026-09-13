@@ -1,3 +1,23 @@
+"""
+Source Container Deactivation Test
+
+Purpose:
+    Validates controlled Source Container deactivation behavior in the
+    AlphaOmega database.
+
+Verifies:
+    - Controlled Source Containers can be upserted for test preparation.
+    - Containers identified as absent can be deactivated.
+    - Deactivation preserves the expected persisted catalog state.
+    - The deactivation database operation affects the intended records.
+
+Does NOT:
+    - Infer absence from an incomplete Source observation.
+    - Enumerate a Source of Truth.
+    - Synchronize content.
+    - Delete Source Container history.
+"""
+
 from datetime import datetime, timezone
 from uuid import uuid4
 

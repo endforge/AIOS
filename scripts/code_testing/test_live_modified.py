@@ -1,43 +1,25 @@
 """
-File: test_live_modified.py
+Live MODIFIED Integration Test
 
 Purpose:
-    Targeted live AlphaOmega MODIFIED integration test.
+    Validates the targeted live AlphaOmega MODIFIED synchronization path for
+    controlled OneDrive and OneNote content.
 
-Targets:
-    OneDrive:
-        Bogmire Introduction Draft v1.docx
+Verifies:
+    - Existing target Knowledge Objects can be resolved before processing.
+    - Live OneDrive and OneNote source objects can be retrieved and translated.
+    - Discovery classifies changed source objects as MODIFIED.
+    - MODIFIED records proceed through Extraction.
+    - Load updates the existing Knowledge Object rather than creating a new
+      identity.
+    - MODIFIED synchronization history is recorded.
+    - Processing Job state reflects successful or failed processing.
 
-    OneNote:
-        Blacksmith Lingo
-
-Pipeline under test:
-
-    Microsoft Graph
-        ->
-    Connector object retrieval
-        ->
-    Orchestration correlation assignment
-        ->
-    Translator
-        ->
-    Discovery = MODIFIED
-        ->
-    Extraction
-        ->
-    Load
-        ->
-    Existing Knowledge Object updated
-        ->
-    Modified Sync History event
-
-IMPORTANT:
-    This test intentionally WRITES to AlphaOmega.
-
-    Both target Knowledge Objects must already exist.
-
-    Both source objects must have been modified after the previous
-    successful synchronization.
+Does NOT:
+    - Perform broad OneDrive or OneNote synchronization.
+    - Test the NEW synchronization path.
+    - Test the UNCHANGED synchronization path.
+    - Modify OneDrive or OneNote source content.
 """
 
 from datetime import datetime, timezone

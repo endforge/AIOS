@@ -1,37 +1,26 @@
 """
+Synchronization Orchestrator Test
+
 Purpose:
-    Isolated tests for SynchronizationOrchestrator.
+    Provides isolated regression validation of SynchronizationOrchestrator.
 
-Primary routing scenario:
-    Three synthetic Connector objects flow through orchestration:
+Verifies:
+    - Required orchestration dependencies are enforced.
+    - A Source name is required.
+    - NEW, MODIFIED, and UNCHANGED records are routed correctly.
+    - Record-level failures remain isolated.
+    - Stage-level failures fail the Processing Job.
+    - MODIFIED records whose extracted content hash is unchanged stop before
+      Load.
+    - Processing Job creation, completion, and failure follow orchestration
+      results.
+    - Synchronization associations preserve stage results across the run.
 
-        Object A -> NEW
-        Object B -> MODIFIED
-        Object C -> UNCHANGED
-
-    The test verifies:
-        - Processing Job lifecycle.
-        - Connector execution.
-        - Correlation identity generation.
-        - Translator association.
-        - Discovery association.
-        - NEW/MODIFIED routing to Extraction.
-        - UNCHANGED short-circuiting.
-        - Extraction association.
-        - Load routing.
-        - Processing Job completion.
-        - Orchestration summary counts.
-
-Additional tests verify:
-        - Required dependency validation.
-        - Missing Source validation.
-        - Stage-level failure behavior.
-        - Translator record-level failure isolation.
-        - Extraction record-level failure isolation.
-        - MODIFIED same-hash short-circuit before Load.
-
-No Microsoft Graph requests are made.
-No database operations are performed.
+Does NOT:
+    - Connect to live Sources of Truth.
+    - Connect to the live AlphaOmega database.
+    - Test UI or application admission.
+    - Bypass synchronization stage boundaries.
 """
 
 from types import SimpleNamespace

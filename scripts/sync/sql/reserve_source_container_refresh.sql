@@ -1,3 +1,21 @@
+-- Reserve Source Container Refresh
+--
+-- Purpose:
+--     Atomically reserves one Source for complete Source Container Refresh
+--     and creates the associated running Processing Job.
+--
+-- Responsibilities:
+--     - Detect conflicting active Refresh execution for the Source.
+--     - Reserve the Source for one Refresh operation.
+--     - Create the running Processing Job within the reservation operation.
+--     - Return the created Processing Job identity.
+--
+-- Does NOT:
+--     - Enumerate Source Containers.
+--     - Apply Source Container catalog changes.
+--     - Complete or fail Processing Jobs.
+--     - Reserve content synchronization.
+
 CREATE OR REPLACE FUNCTION public.reserve_source_container_refresh(
     p_source_id uuid,
     p_process_type text,

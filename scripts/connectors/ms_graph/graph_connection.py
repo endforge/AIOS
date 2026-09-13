@@ -1,19 +1,25 @@
 """
-Microsoft Graph connection for AlphaOmega.
+AlphaOmega Microsoft Graph Connection
+
+Purpose:
+    Provides the authenticated HTTP connection boundary used to communicate
+    with Microsoft Graph.
 
 Responsibilities:
     - Authenticate with Microsoft Graph.
-    - Maintain an authenticated session.
-    - Execute HTTP requests.
-    - Return the raw HTTP response.
+    - Obtain Microsoft Graph access tokens.
+    - Build Microsoft Graph request URLs and authorization headers.
+    - Execute HTTP requests against Microsoft Graph.
+    - Maintain the authenticated Microsoft Graph session.
+    - Return raw HTTP responses to consuming components.
 
-This module does NOT:
+Does NOT:
     - Know about OneDrive.
     - Know about OneNote.
-    - Traverse repositories.
-    - Parse business objects.
-    - Normalize data.
-    - Perform synchronization decisions.
+    - Normalize Microsoft Graph data.
+    - Parse source business objects.
+    - Make synchronization decisions.
+    - Traverse source repositories.
 """
 
 import requests

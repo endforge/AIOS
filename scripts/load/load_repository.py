@@ -1,9 +1,23 @@
 """
-File: load_repository.py
+AlphaOmega Load Repository
 
 Purpose:
-    Provides database access to the atomic persistence operation
-    required by the AlphaOmega Load stage.
+    Provides the persistence boundary used by Load to write synchronized
+    Knowledge Object and synchronization-history data.
+
+Responsibilities:
+    - Create new Knowledge Objects through the Knowledge Object repository.
+    - Update existing Knowledge Objects through the Knowledge Object
+      repository.
+    - Record synchronization history through the synchronization history
+      repository.
+    - Keep Load persistence operations behind repository boundaries.
+
+Does NOT:
+    - Determine synchronization state.
+    - Retrieve or extract source content.
+    - Decide whether a record is eligible for Load.
+    - Execute synchronization orchestration.
 """
 
 from typing import Any, Mapping, Optional

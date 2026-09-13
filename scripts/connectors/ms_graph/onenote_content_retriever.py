@@ -1,11 +1,17 @@
 """
-File: onenote_content_retriever.py
+OneNote Content Retriever
 
 Purpose:
     Retrieves the raw content of one identified OneNote content object
     for downstream Extraction.
 
-This module does NOT:
+Responsibilities:
+    - Retrieve one identified OneNote content object by its source object ID.
+    - Use Microsoft Graph to retrieve the object's raw content.
+    - Require the requested object to be eligible CONTENT.
+    - Return the retrieved content for downstream Extraction.
+
+Does NOT:
     - Enumerate OneNote.
     - Determine synchronization state.
     - Extract canonical content.

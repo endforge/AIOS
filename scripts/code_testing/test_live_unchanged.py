@@ -1,40 +1,25 @@
 """
-File: test_live_unchanged.py
+Live UNCHANGED Integration Test
 
 Purpose:
-    Targeted live AlphaOmega UNCHANGED integration test.
+    Validates the targeted live AlphaOmega UNCHANGED path for known OneDrive
+    and OneNote content whose persisted source facts match the current Sources
+    of Truth.
 
-Targets:
-    OneDrive:
-        Bogmire Introduction Draft v1.docx
+Verifies:
+    - Live OneDrive and OneNote targets can be retrieved and translated.
+    - Discovery classifies matching persisted source facts as UNCHANGED.
+    - Correlation identity is preserved.
+    - Existing Knowledge Object identities are preserved.
+    - Previous content hashes are preserved.
+    - UNCHANGED records do not require Extraction.
+    - No comparison reasons are produced for unchanged records.
 
-    OneNote:
-        Blacksmith Lingo
-
-Pipeline under test:
-
-    Microsoft Graph
-        ->
-    exact live source retrieval
-        ->
-    TranslationInput correlation
-        ->
-    GraphTranslator
-        ->
-    Discovery = UNCHANGED
-        ->
-    STOP
-
-This test proves that source facts persisted by the previous successful
-MODIFIED synchronization now match the current Sources of Truth.
-
-IMPORTANT:
-    This test is intentionally read-only.
-
-    It does NOT run Extraction.
-    It does NOT run Load.
-    It does NOT create a Processing Job.
-    It performs no database writes.
+Does NOT:
+    - Perform Extraction.
+    - Perform Load.
+    - Create a Processing Job.
+    - Write to the AlphaOmega database.
 """
 
 from scripts.sync.sync_state import (

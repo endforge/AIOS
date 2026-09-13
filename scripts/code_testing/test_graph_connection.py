@@ -1,13 +1,23 @@
 """
-Manual test for the Microsoft Graph connection.
+Microsoft Graph Connection Test
 
-This verifies that AlphaOmega can:
-1. Load Microsoft Graph configuration.
-2. Authenticate through MSAL.
-3. Receive an access token.
-4. Send an authenticated request.
-5. Receive a valid HTTP response.
-6. Parse returned JSON.
+Purpose:
+    Validates the production Microsoft Graph connection through a live
+    authenticated request.
+
+Verifies:
+    - Microsoft Graph configuration can be loaded.
+    - Authentication through MSAL succeeds.
+    - An access token can be obtained.
+    - An authenticated Microsoft Graph request can be sent.
+    - Microsoft Graph returns a valid HTTP response.
+    - Returned JSON can be parsed.
+
+Does NOT:
+    - Modify Microsoft Graph source data.
+    - Enumerate a complete Source of Truth.
+    - Execute synchronization.
+    - Write to the AlphaOmega database.
 """
 
 from scripts.connectors.ms_graph.graph_connection import graph_get

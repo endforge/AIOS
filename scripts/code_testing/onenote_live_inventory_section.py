@@ -1,22 +1,20 @@
 """
-File:
-    onenote_live_inventory_section.py
+OneNote Live Section Inventory
 
 Purpose:
-    Read-only inventory of a controlled live OneNote Section
-    before multi-record AlphaOmega synchronization testing.
+    Performs a live read-only inventory of a selected OneNote section through
+    Microsoft Graph.
 
-Target:
-    Notebook: Mimic's Tavern
-    Section:  House Rules
+Verifies:
+    - The configured OneNote hierarchy can be queried through Microsoft Graph.
+    - Pages within the selected section can be identified.
+    - Live source inventory can be inspected without database persistence.
 
-This script:
-    - Reads OneNote only.
-    - Completely enumerates pages in the target Section.
-    - Retrieves the live parent Section timestamp.
-    - Does not modify OneNote.
-    - Does not write to AlphaOmega.
-    - Does not execute Synchronization.
+Does NOT:
+    - Modify OneNote.
+    - Write to the AlphaOmega database.
+    - Execute the synchronization pipeline.
+    - Create Knowledge Objects.
 """
 
 from scripts.connectors.ms_graph.graph_connection import (

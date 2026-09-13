@@ -1,3 +1,21 @@
+-- Apply Source Container Refresh
+--
+-- Purpose:
+--     Applies one reconciled Source Container Refresh as an atomic database
+--     operation.
+--
+-- Responsibilities:
+--     - Apply Source Container upserts for the Refresh.
+--     - Apply required Source Container deactivations.
+--     - Keep catalog changes within one database transaction boundary.
+--     - Coordinate the approved Source Container persistence operations.
+--
+-- Does NOT:
+--     - Enumerate a Source of Truth.
+--     - Validate Source Container observations.
+--     - Perform reconciliation.
+--     - Synchronize content.
+
 CREATE OR REPLACE FUNCTION public.apply_source_container_refresh(
     p_source_id uuid,
     p_processing_job_id uuid,

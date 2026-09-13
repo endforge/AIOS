@@ -1,9 +1,21 @@
 """
-File: translator_loader.py
+AlphaOmega Translator Loader
 
 Purpose:
-    Returns the appropriate Translator implementation for the
-    requested Source of Truth.
+    Loads the appropriate Translator implementation for a requested Source
+    of Truth.
+
+Responsibilities:
+    - Map supported Source of Truth names to their Translator implementation.
+    - Return GraphTranslator for supported OneDrive requests.
+    - Return GraphTranslator for supported OneNote requests.
+    - Reject unsupported Source of Truth names.
+
+Does NOT:
+    - Execute Translation.
+    - Retrieve source objects.
+    - Perform Discovery, Extraction, or Load.
+    - Persist Knowledge Objects.
 """
 
 from scripts.translators.graph_translator import GraphTranslator

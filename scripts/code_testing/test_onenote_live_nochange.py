@@ -1,49 +1,25 @@
 """
-File:
-    test_onenote_live_nochange.py
+Live OneNote No-Content-Change Test
 
 Purpose:
-    Controlled live OneNote NO-CONTENT-CHANGE synchronization test.
+    Validates controlled live OneNote synchronization when metadata indicates
+    a possible change but canonical page content has not changed.
 
-Target:
-    OneNote
-        Notebook: Mimic's Tavern
-        Section:  House Rules
+Verifies:
+    - The controlled House Rules scope can be synchronized.
+    - OneNote Section modification time is used as the effective page
+      source_modified_at where required.
+    - Metadata changes can cause pages to enter the MODIFIED candidate path.
+    - Extraction identifies records whose canonical content remains unchanged.
+    - Same-hash records stop before unnecessary Load.
+    - Database state remains correct after processing.
+    - Processing Job state reflects successful completion.
 
-Known OneNote behavior:
-    OneNote page-level lastModifiedDateTime may be stale.
-    AlphaOmega therefore uses the Section modification timestamp as the
-    effective source_modified_at for contained page CONTENT.
-
-    A Section timestamp change can cause unchanged pages to enter Discovery
-    as MODIFIED candidates.
-
-    This is acceptable only when canonical content hashing prevents
-    same-content records from reaching Load.
-
-Acceptance criteria:
-    - Connector returns exactly:
-        1 CONTAINER
-        16 CONTENT
-    - 17 SynchronizationAssociations are created.
-    - 17 TranslatorRecords are created.
-    - CONTAINER stops after Translator.
-    - All 16 CONTENT records reach Discovery.
-    - No CONTENT record is NEW.
-    - UNCHANGED records stop before Extraction.
-    - MODIFIED records reach Extraction.
-    - Every MODIFIED record has the same canonical hash as its existing
-      Knowledge Object.
-    - No record reaches Load persistence.
-    - No Knowledge Object changes.
-    - No Sync History event is created.
-    - Processing Job completes successfully.
-
-IMPORTANT:
-    Do not modify any page in House Rules before running this test.
-
-    This test creates a Processing Job.
-    It must not modify Knowledge Objects or create Sync History events.
+Does NOT:
+    - Treat metadata change alone as proof of content change.
+    - Update Knowledge Objects whose canonical content is unchanged.
+    - Synchronize the complete OneNote Source of Truth.
+    - Modify OneNote source content.
 """
 
 from datetime import datetime

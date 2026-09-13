@@ -1,28 +1,20 @@
 """
-File: test_live_graph_extraction.py
+Live Microsoft Graph Extraction Test
 
 Purpose:
-    Verify live Microsoft Graph content retrieval through the
-    AlphaOmega Extraction stage.
+    Validates Extraction against live content retrieved from Microsoft Graph.
 
-Live test targets:
-    OneDrive:
-        Bogmire Adventure.docx
+Verifies:
+    - Live source content can be retrieved for controlled test objects.
+    - ExtractionService can process the retrieved source content.
+    - Canonical extracted content is produced from the live source object.
+    - Extraction produces the metadata required for downstream Load.
 
-    OneNote:
-        Mimic's Tavern
-        Lingo
-        Blacksmith Lingo
-
-This test:
-    - Uses exact known Microsoft Graph object IDs.
-    - Performs live read-only Microsoft Graph retrieval.
-    - Executes ExtractionService.
-    - Does not enumerate Sources of Truth.
-    - Does not execute Translator or Discovery.
-    - Does not write to the AlphaOmega database.
-    - Does not execute Load.
-    - Does not print extracted canonical content.
+Does NOT:
+    - Perform Load.
+    - Persist Knowledge Objects.
+    - Modify Microsoft Graph source data.
+    - Execute the complete synchronization pipeline.
 """
 
 from types import SimpleNamespace

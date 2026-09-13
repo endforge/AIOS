@@ -1,3 +1,23 @@
+"""
+Source Container Repository Test
+
+Purpose:
+    Validates SourceContainerRepository database access behavior.
+
+Verifies:
+    - Source Containers can be found by AlphaOmega identity.
+    - Source Containers can be found by Source and source-native identity.
+    - Containers belonging to a Source can be retrieved.
+    - Active containers belonging to a Source can be retrieved.
+    - Repository results preserve expected Source Container fields.
+
+Does NOT:
+    - Enumerate Sources of Truth.
+    - Perform Source Container reconciliation.
+    - Refresh the Source Container Catalog.
+    - Synchronize content.
+"""
+
 from datetime import datetime, timezone
 from uuid import uuid4
 

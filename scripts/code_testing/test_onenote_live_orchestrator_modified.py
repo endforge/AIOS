@@ -1,36 +1,25 @@
 """
-File:
-    test_onenote_live_orchestrator_modified.py
+Live OneNote Orchestrator MODIFIED Test
 
 Purpose:
-    Blind controlled live multi-record OneNote MODIFIED test.
+    Validates a controlled live multi-record OneNote MODIFIED synchronization
+    run through SynchronizationOrchestrator.
 
-Target:
-    OneNote
-        Notebook: Mimic's Tavern
-        Section:  House Rules
+Verifies:
+    - Existing persisted state can be captured before synchronization.
+    - The controlled OneNote scope is processed through the production
+      synchronization stages.
+    - Expected records enter the MODIFIED path.
+    - Eligible changed content proceeds through Extraction and Load.
+    - Existing Knowledge Object identities are preserved during updates.
+    - Database results match orchestration decisions.
+    - Processing Job state reflects successful completion.
 
-Test condition:
-    Exactly one of the 16 pages has been changed by the user.
-    The test does NOT know which page changed.
-
-Expected behavior:
-    - 17 total associations
-        - 1 CONTAINER
-        - 16 CONTENT
-    - 16 Discovery MODIFIED
-    - 16 Extraction records
-    - exactly 1 extracted hash differs from stored hash
-    - exactly 15 extracted hashes match stored hashes
-    - exactly 1 Knowledge Object updated in place
-    - exactly 15 Knowledge Objects remain unchanged
-    - exactly 1 MODIFIED Sync History event
-    - 1 completed Processing Job
-
-IMPORTANT:
-    THIS TEST WRITES TO ALPHAOMEGA.
-
-Do not rerun after Synchronization begins if the test fails.
+Does NOT:
+    - Synchronize the complete OneNote Source of Truth.
+    - Test the NEW-only scenario.
+    - Modify OneNote source content.
+    - Create replacement Knowledge Object identities for MODIFIED records.
 """
 
 from common.security.local_credential_provider import (

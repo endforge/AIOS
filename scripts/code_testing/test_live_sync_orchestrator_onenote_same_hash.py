@@ -1,59 +1,33 @@
 """
-File: test_live_sync_orchestrator_onenote_same_hash.py
+Live OneNote Synchronization Orchestrator Same-Hash Test
 
 Purpose:
-    Targeted live end-to-end AlphaOmega synchronization test
-    conducted by SynchronizationOrchestrator.
+    Validates the live orchestration path where OneNote metadata causes
+    Discovery to report MODIFIED but Extraction produces the same canonical
+    content hash already stored for the Knowledge Object.
 
-Target:
-    OneNote:
-        Blacksmith Lingo
+Verifies:
+    - A changed parent Section timestamp can cause the controlled OneNote
+      page to enter the MODIFIED path.
+    - Translator uses the parent Section modification timestamp as the
+      page's source_modified_at.
+    - Discovery classifies the controlled page as MODIFIED.
+    - Extraction executes for the MODIFIED record.
+    - Extraction produces the same canonical content hash already stored.
+    - SynchronizationOrchestrator stops the record before Load when the
+      canonical content hash is unchanged.
+    - The existing Knowledge Object remains unchanged.
+    - No new synchronization history event is created for the controlled
+      Knowledge Object.
+    - The Processing Job still completes successfully.
 
-Scenario:
-    A different page in the same OneNote Section has changed.
-
-    Microsoft Graph therefore advances the parent Section
-    lastModifiedDateTime even though Blacksmith Lingo itself
-    has not changed.
-
-Expected behavior:
-
-    Connector
-        -> retrieves Blacksmith Lingo
-        -> retrieves parent Section timestamp
-
-    Translator
-        -> uses Section lastModifiedDateTime
-           as source_modified_at
-
-    Discovery
-        -> MODIFIED
-
-    Extraction
-        -> executes
-        -> produces the SAME canonical content hash
-           already stored for Blacksmith Lingo
-
-    Orchestrator
-        -> recognizes identical hashes
-        -> stops record before Load
-
-    Load
-        -> NOT invoked
-
-    Database
-        -> existing Knowledge Object remains unchanged
-        -> no new Sync History event for this Knowledge Object
-
-    Processing Job
-        -> completes successfully
-
-IMPORTANT:
-    This test creates a Processing Job in AlphaOmega.
-
-    It must NOT update the controlled Knowledge Object.
-    It must NOT create a Sync History event for the
-    controlled Knowledge Object.
+Does NOT:
+    - Update the controlled Knowledge Object when canonical content is
+      unchanged.
+    - Create a synchronization history event for the unchanged Knowledge
+      Object.
+    - Synchronize the complete OneNote Source of Truth.
+    - Modify the OneNote source page.
 """
 
 from common.security.local_credential_provider import (

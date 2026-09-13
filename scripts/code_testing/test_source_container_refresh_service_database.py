@@ -1,15 +1,23 @@
 """
-Controlled database-backed test for SourceContainerRefreshService.
+Source Container Refresh Service Database Test
 
-The test:
+Purpose:
+    Validates SourceContainerRefreshService against the AlphaOmega database
+    using a controlled Source Container observation.
 
-1. Creates one disposable Source.
-2. Uses a fake complete Container observation.
-3. Runs the production reservation and Refresh database functions.
-4. Verifies the Containers and completed Processing Job.
-5. Removes every disposable record in finally.
+Verifies:
+    - A controlled Refresh can reserve execution in the database.
+    - Observed containers are reconciled against persisted state.
+    - Refresh results are applied atomically.
+    - Persisted Source Container state matches the controlled observation.
+    - Processing Job lifecycle state reflects the Refresh result.
+    - Disposable test records can be cleaned up after validation.
 
-No Microsoft Graph connection is used.
+Does NOT:
+    - Perform broad live Source enumeration.
+    - Synchronize content.
+    - Create Knowledge Objects.
+    - Replace production Source Container population.
 """
 
 

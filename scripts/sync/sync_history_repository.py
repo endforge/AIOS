@@ -1,11 +1,20 @@
 """
 AlphaOmega Synchronization History Repository
 
-Provides database access to synchronization history.
+Purpose:
+    Provides database persistence operations for synchronization history.
 
-The repository owns storage-specific operations against the
-sync_history table. It does not determine synchronization state
-or interpret synchronization events.
+Responsibilities:
+    - Create synchronization history records.
+    - Persist the factual synchronization event data supplied by Load.
+    - Own storage-specific operations against the sync_history table.
+    - Validate required persistence inputs and database results.
+
+Does NOT:
+    - Determine synchronization state.
+    - Decide whether synchronization history should be created.
+    - Modify Knowledge Objects.
+    - Execute synchronization stages.
 """
 
 from typing import Any, Mapping

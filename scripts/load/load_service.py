@@ -1,35 +1,27 @@
 """
-File: load_service.py
+AlphaOmega Load Service
 
 Purpose:
-    Coordinates the AlphaOmega Load stage.
+    Executes the Load stage for synchronization associations eligible for
+    persistence in the Canonical Knowledge Repository.
 
-Load receives synchronization associations that already contain
-the trusted Translator, Discovery, and Extraction records belonging
-to the same source object.
+Responsibilities:
+    - Validate required Translator, Discovery, and Extraction results.
+    - Preserve orchestration correlation identity across Load.
+    - Persist NEW Knowledge Objects.
+    - Update MODIFIED Knowledge Objects.
+    - Record synchronization history for persisted changes.
+    - Reuse resolved Source identity within a Load run.
+    - Isolate record-level Load failures.
+    - Report stage-level Load failures.
+    - Produce and lock the completed LoadSection.
 
-Load owns:
-    - Validation that an association is eligible for persistence.
-    - Source ID resolution and per-run Source caching.
-    - Assembly of trusted upstream values for persistence.
-    - Conversion of immutable upstream metadata into persistence-safe
-      JSON-compatible structures.
-    - Invocation of the atomic Load repository operation.
-    - Record-level Load error isolation.
-    - Stage-level Load failure reporting.
-    - LoadSection production and locking.
-
-Load does NOT:
-    - Enumerate Sources of Truth.
+Does NOT:
+    - Retrieve source content.
     - Translate source metadata.
     - Determine synchronization state.
-    - Extract canonical content.
-    - Correlate records across synchronization stages.
-    - Create Processing Jobs.
-    - Generate, modify, or persist orchestration correlation identity.
-
-Synchronization Orchestration owns cross-stage association and supplies
-the Processing Job ID for the current synchronization run.
+    - Load UNCHANGED records.
+    - Perform AI interpretation or enrichment.
 """
 
 from collections.abc import Mapping

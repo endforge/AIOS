@@ -1,3 +1,25 @@
+"""
+AlphaOmega Source Container Reconciler
+
+Purpose:
+    Compares a validated complete Source Container observation with persisted
+    catalog state.
+
+Responsibilities:
+    - Identify newly observed Source Containers.
+    - Identify existing Source Containers.
+    - Identify previously inactive containers that have reappeared.
+    - Identify persisted containers absent from the complete observation.
+    - Produce reconciliation results required for atomic persistence.
+
+Does NOT:
+    - Enumerate Sources of Truth.
+    - Validate observation completeness.
+    - Persist reconciliation results.
+    - Deactivate Source Containers itself.
+    - Synchronize content.
+"""
+
 class SourceContainerReconciler:
     """
     Compare a validated complete Source Container observation

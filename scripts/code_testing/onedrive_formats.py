@@ -1,24 +1,21 @@
 """
-File:
-    onedrive_formats.py
+OneDrive File Format Inventory
 
 Purpose:
-    Read-only inventory of file formats present across the entire
+    Produces a read-only inventory of file formats present across the
     configured OneDrive Source of Truth.
 
-The test:
-    - Uses the production GraphConnector.
-    - Enumerates the complete OneDrive using the production
-      OneDrive delta implementation.
-    - Does NOT retrieve file content.
-    - Does NOT execute Synchronization.
-    - Does NOT write to AlphaOmega.
-    - Counts file extensions.
-    - Compares discovered extensions against the current
-      TextExtractor supported-extension registry.
-    - Prints representative source paths for each format.
+Verifies:
+    - The production GraphConnector can enumerate the configured OneDrive.
+    - File extensions present in OneDrive can be identified and counted.
+    - Supported and unsupported extraction formats can be inspected against
+      the live source inventory.
 
-This is a discovery/analysis utility only.
+Does NOT:
+    - Modify OneDrive.
+    - Write to the AlphaOmega database.
+    - Extract or persist Knowledge Objects.
+    - Change synchronization behavior.
 """
 
 from collections import defaultdict

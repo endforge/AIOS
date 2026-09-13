@@ -1,42 +1,27 @@
 """
-File: test_live_sync_orchestrator_modified.py
+Live OneDrive Synchronization Orchestrator MODIFIED Test
 
 Purpose:
-    First targeted live end-to-end AlphaOmega synchronization test
-    conducted by SynchronizationOrchestrator.
+    Validates a targeted live end-to-end MODIFIED synchronization run
+    conducted by SynchronizationOrchestrator for one known OneDrive object.
 
-Target:
-    OneDrive:
-        Bogmire Introduction Draft v1.docx
+Verifies:
+    - The controlled OneDrive target begins with an existing Knowledge Object.
+    - SynchronizationOrchestrator executes the production synchronization
+      stages for exactly one targeted OneDrive object.
+    - Discovery classifies the controlled object as MODIFIED.
+    - Eligible MODIFIED content proceeds through Extraction and Load.
+    - The existing Knowledge Object is updated rather than assigned a new
+      identity.
+    - Synchronization history records the expected persistence event.
+    - The Processing Job completes successfully with the expected sync
+      process type and pipeline version.
 
-This test intentionally limits Connector scope to exactly one known
-OneDrive object.
-
-Production components under test:
-
-    ProcessingJobRepository
-        ->
-    SynchronizationOrchestrator
-        ->
-    TranslationInput
-        ->
-    GraphTranslator
-        ->
-    DiscoveryService
-        ->
-    ExtractionService
-        ->
-    LoadService
-        ->
-    Canonical Knowledge Repository
-
-IMPORTANT:
-    This test WRITES to AlphaOmega.
-
-    The target is currently expected to be MODIFIED relative to the
-    existing Knowledge Object.
-
-    This is intentionally a one-object end-to-end test.
+Does NOT:
+    - Synchronize the complete OneDrive Source of Truth.
+    - Test the NEW synchronization path.
+    - Test the UNCHANGED synchronization path.
+    - Modify the OneDrive source object.
 """
 
 from common.security.local_credential_provider import (

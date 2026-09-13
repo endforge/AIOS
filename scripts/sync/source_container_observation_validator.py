@@ -1,3 +1,25 @@
+"""
+AlphaOmega Source Container Observation Validator
+
+Purpose:
+    Validates Source Container observations before reconciliation or
+    persistence decisions are allowed.
+
+Responsibilities:
+    - Require complete observations where completeness is necessary.
+    - Validate required Source Container identity fields.
+    - Reject duplicate source-native container identities.
+    - Validate parent relationships within the observed hierarchy.
+    - Reject structurally invalid Source Container observations.
+
+Does NOT:
+    - Enumerate Sources of Truth.
+    - Compare observations with persisted catalog state.
+    - Persist Source Containers.
+    - Infer absence from incomplete observations.
+    - Synchronize content.
+"""
+
 class SourceContainerObservationValidator:
     """
     Validate a complete Source Container observation before it may

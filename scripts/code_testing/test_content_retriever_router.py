@@ -1,9 +1,20 @@
 """
-File: test_content_retriever_router.py
+Content Retriever Router Test
 
 Purpose:
-    Verify Extraction content retriever selection without
-    making live source-system requests.
+    Validates selection behavior of the Extraction content retriever router.
+
+Verifies:
+    - Supported source and object combinations resolve to the appropriate
+      content retriever.
+    - Unsupported retrieval requests are rejected as expected.
+    - Retriever routing remains separate from content retrieval itself.
+
+Does NOT:
+    - Connect to a live Source of Truth.
+    - Retrieve source content.
+    - Perform Extraction.
+    - Persist Knowledge Objects.
 """
 
 from unittest.mock import Mock

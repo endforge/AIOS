@@ -1,18 +1,23 @@
 """
-File: test_discovery_record_failure.py
+Discovery Record Failure Test
 
 Purpose:
-    Verifies Discovery record-level exception handling and
-    orchestration correlation preservation.
+    Verifies Discovery record-level exception handling and orchestration
+    correlation preservation.
 
-Test:
-    One controlled DiscoveryRecordError must:
-        1. Fail only the affected record.
-        2. Be recorded in DiscoverySection.record_errors.
-        3. Preserve the failed record's correlation UUID.
-        4. Allow subsequent records to continue processing.
-        5. Preserve correlation UUIDs for successful records.
-        6. Allow Discovery to complete successfully.
+Verifies:
+    - One controlled DiscoveryRecordError fails only the affected record.
+    - The failure is recorded in DiscoverySection.record_errors.
+    - The failed record's correlation UUID is preserved.
+    - Subsequent records continue processing after the record-level failure.
+    - Successful records preserve their own correlation UUIDs.
+    - Discovery can complete successfully despite the isolated record failure.
+
+Does NOT:
+    - Simulate a stage-level Discovery failure.
+    - Modify source data.
+    - Perform Extraction or Load.
+    - Persist Knowledge Objects.
 """
 
 from datetime import datetime, timezone

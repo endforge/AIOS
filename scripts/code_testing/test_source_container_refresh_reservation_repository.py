@@ -1,8 +1,22 @@
 """
-Controlled test for SourceContainerRefreshReservationRepository.
+Source Container Refresh Reservation Repository Test
 
-No database connection is used.
-No records are created.
+Purpose:
+    Validates SourceContainerRefreshReservationRepository using controlled
+    database RPC behavior.
+
+Verifies:
+    - A complete Source Refresh reservation invokes the expected database RPC.
+    - Required reservation inputs are validated.
+    - Successful reservation returns the created Processing Job identity.
+    - Invalid or failed RPC responses are rejected.
+    - Reservation remains an atomic database boundary.
+
+Does NOT:
+    - Connect to the live AlphaOmega database.
+    - Enumerate Source Containers.
+    - Perform reconciliation.
+    - Complete or fail Processing Jobs.
 """
 
 

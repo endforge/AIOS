@@ -1,16 +1,20 @@
 """
-Controlled failure-path test for SourceContainerRefreshService.
+Source Container Refresh Service Failure Test
 
-Confirms that an incomplete observation:
+Purpose:
+    Validates controlled failure behavior of SourceContainerRefreshService.
 
-- Is rejected by the production validator.
-- Does not reach catalog persistence.
-- Marks the reserved Processing Job failed.
-- Propagates the original validation error.
+Verifies:
+    - Incomplete Source observations are rejected.
+    - Failed Refresh processing causes the Processing Job to fail.
+    - Failure does not proceed into successful catalog persistence.
+    - Reservation and Processing Job failure behavior remain coordinated.
 
-No Microsoft Graph connection is used.
-No database connection is used.
-No records are changed.
+Does NOT:
+    - Connect to a live Source of Truth.
+    - Connect to the live AlphaOmega database.
+    - Apply successful catalog changes.
+    - Synchronize content.
 """
 
 

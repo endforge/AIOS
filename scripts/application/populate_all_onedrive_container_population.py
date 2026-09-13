@@ -1,22 +1,24 @@
 """
-Controlled full OneDrive Source Container population test.
+Complete OneDrive Source Container Population
 
-This script:
+Purpose:
+    Performs the controlled initial population of the complete persisted
+    OneDrive Source Container Catalog.
 
-- Enumerates the complete current OneDrive folder structure.
-- Validates the complete observation.
-- Measures the complete persistence payload.
-- Applies safety limits before writing.
-- Upserts every observed OneDrive Container atomically.
-- Retrieves the complete catalog using paginated repository access.
-- Verifies exact identities, hierarchy, names, active state, and
-  Processing Job attribution.
+Responsibilities:
+    - Enumerate the complete OneDrive container hierarchy.
+    - Validate the complete Source Container observation.
+    - Compare the observation with existing persisted Source Containers.
+    - Create a Processing Job for the controlled population.
+    - Persist observed OneDrive Source Containers through the approved
+      database operation.
+    - Report population measurements and results.
 
-This is a persistent database operation.
-
-It does not synchronize file content.
-It does not deactivate Containers absent from the observation.
-It does not modify OneNote Source Containers.
+Does NOT:
+    - Perform ongoing Source Container Refresh.
+    - Synchronize OneDrive file content.
+    - Create Knowledge Objects.
+    - Replace the shared SourceContainerRefreshService.
 """
 
 import json

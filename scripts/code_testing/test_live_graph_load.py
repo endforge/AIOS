@@ -1,37 +1,24 @@
 """
-File: test_live_graph_load.py
+Live Microsoft Graph Load Test
 
 Purpose:
-    Perform the targeted live AlphaOmega Load integration test.
+    Validates the NEW Load path using controlled live Microsoft Graph source
+    objects and the AlphaOmega database.
 
-Targets:
-    OneDrive:
-        Bogmire Introduction Draft v1.docx
+Verifies:
+    - Controlled live source objects are absent from knowledge_objects before
+      NEW processing begins.
+    - Live source content can be extracted for Load.
+    - NEW Knowledge Objects can be persisted through LoadService.
+    - Persisted Knowledge Objects contain the expected synchronized data.
+    - NEW synchronization history events are recorded.
+    - Processing Job state can be completed for successful test processing.
 
-    OneNote:
-        Blacksmith Lingo
-
-This test:
-    - Targets exactly two known Microsoft Graph objects.
-    - Does NOT enumerate OneDrive.
-    - Does NOT enumerate OneNote.
-    - Performs real live Graph content retrieval.
-    - Performs real Extraction.
-    - Builds controlled upstream Translator/Discovery records.
-    - Builds real SynchronizationAssociation objects.
-    - Performs real LoadService persistence.
-    - Uses the real LoadRepository and load_knowledge_object RPC.
-    - Creates one Processing Job as test scaffolding.
-    - Marks that Processing Job completed on success.
-    - Marks that Processing Job failed on test failure.
-    - Verifies resulting Knowledge Objects and Sync History.
-
-IMPORTANT:
-    This test intentionally writes TWO Knowledge Objects to AlphaOmega.
-
-    The test currently validates the NEW Load path. It requires both
-    target source objects to be absent from knowledge_objects before
-    execution.
+Does NOT:
+    - Test the MODIFIED Load path.
+    - Test the UNCHANGED synchronization path.
+    - Modify Microsoft Graph source content.
+    - Perform broad Source of Truth synchronization.
 """
 
 from datetime import datetime, timezone

@@ -1,38 +1,24 @@
 """
-File:
-    test_sync_container_boundary.py
+Synchronization CONTAINER Boundary Test
 
 Purpose:
-    Isolated regression test for the canonical CONTAINER orchestration
-    boundary.
+    Validates the canonical CONTAINER orchestration boundary.
 
-Contract under test:
-    CONTAINER:
-        Connector
-        -> correlation identity
-        -> SynchronizationAssociation
-        -> Translator
-        -> STOP
+Verifies:
+    - CONTAINER objects can pass through Connector and Translator.
+    - CONTAINER objects preserve synchronization association and correlation
+      identity.
+    - CONTAINER objects do not proceed into content Discovery, Extraction,
+      or Load behavior intended for Knowledge Objects.
+    - CONTENT objects remain eligible for downstream synchronization stages.
+    - Processing Job lifecycle behavior remains valid when CONTAINER objects
+      are present.
 
-    CONTENT:
-        Connector
-        -> correlation identity
-        -> SynchronizationAssociation
-        -> Translator
-        -> Discovery
-        -> normal downstream routing
-
-Expected orchestration counts:
-    associations = 2
-    translated   = 2
-    discovered   = 1
-    extracted    = 0
-    new          = 0
-    modified     = 0
-    unchanged    = 1
-
-No external systems are used.
-No database writes occur.
+Does NOT:
+    - Treat CONTAINER objects as Knowledge Objects.
+    - Retrieve live source content.
+    - Connect to the live AlphaOmega database.
+    - Change canonical object-type definitions.
 """
 
 from common.object_types import (

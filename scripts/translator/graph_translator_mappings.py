@@ -1,12 +1,22 @@
 """
-File: graph_translator_mappings.py
+AlphaOmega Microsoft Graph Translator Mappings
 
 Purpose:
-    Defines Microsoft Graph-specific mappings used by GraphTranslator.
+    Defines the source-specific mapping rules used to translate supported
+    Microsoft Graph object types into canonical AlphaOmega object types.
 
-This module contains knowledge of Microsoft Graph's object structure.
-It translates Microsoft-specific representations into AlphaOmega's
-canonical synchronization concepts.
+Responsibilities:
+    - Define supported Microsoft Graph source object mappings.
+    - Map supported source structures to canonical CONTENT or CONTAINER
+      object types.
+    - Provide centralized mapping rules used by GraphTranslator.
+
+Does NOT:
+    - Execute Translation.
+    - Retrieve Microsoft Graph objects.
+    - Generate orchestration correlation identity.
+    - Determine synchronization state.
+    - Persist Knowledge Objects.
 """
 
 from collections.abc import Mapping

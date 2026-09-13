@@ -1,24 +1,26 @@
 """
-File: test_load_service.py
+Load Service Test
 
 Purpose:
-    Isolated regression test for AlphaOmega LoadService.
+    Provides isolated regression validation of AlphaOmega LoadService using
+    mocked repositories.
 
-    This test uses mocked repositories only. It does not connect
-    to Supabase and does not modify AlphaOmega database records.
+Verifies:
+    - NEW associations are persisted correctly.
+    - MODIFIED associations are persisted correctly.
+    - Processing Job identity propagates correctly.
+    - Source identity lookup is cached.
+    - Correlation mismatches are isolated.
+    - Missing Translator, Discovery, and Extraction records are handled.
+    - UNCHANGED associations are rejected from Load.
+    - Repository persistence failures remain isolated from other records.
+    - LoadSection completes and locks correctly.
 
-Tests:
-    1. NEW association persistence.
-    2. MODIFIED association persistence.
-    3. Processing Job identity propagation.
-    4. Source ID lookup caching.
-    5. Correlation mismatch isolation.
-    6. Missing TranslatorRecord handling.
-    7. Missing DiscoveryRecord handling.
-    8. Missing ExtractionRecord handling.
-    9. UNCHANGED rejection.
-    10. Repository persistence failure isolation and continuation.
-    11. LoadSection completion and locking.
+Does NOT:
+    - Connect to Supabase.
+    - Modify AlphaOmega database records.
+    - Retrieve live source content.
+    - Execute the complete synchronization pipeline.
 """
 
 from types import SimpleNamespace

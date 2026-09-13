@@ -1,11 +1,27 @@
 """
-Coordinate one complete production Source Container Refresh.
+AlphaOmega Source Container Refresh Service
 
-This service owns the shared Refresh workflow used by every configured
-Source of Truth.
+Purpose:
+    Coordinates one complete production Source Container Refresh.
 
-Source-specific enumeration remains the responsibility of the injected
-enumerator.
+Responsibilities:
+    - Reserve the Source for Refresh and create its Processing Job atomically.
+    - Invoke the injected Source-specific container enumerator.
+    - Validate the complete Source Container observation.
+    - Add the AlphaOmega-managed Source Root Container.
+    - Retrieve persisted Source Container state.
+    - Reconcile observed and persisted containers.
+    - Apply reconciliation results through the atomic Refresh database
+      operation.
+    - Complete or fail the Processing Job.
+    - Measure and return Refresh operational results.
+
+Does NOT:
+    - Implement Source-specific enumeration.
+    - Synchronize source content.
+    - Create Knowledge Objects.
+    - Treat incomplete enumeration as proof of absence.
+    - Combine separate Sources into one Processing Job.
 """
 
 import json
@@ -20,6 +36,7 @@ class SourceContainerRefreshService:
         *,
         enumerator,
         observation_validator,
+        source_container_root_service,
         source_container_repository,
         reconciler,
         refresh_reservation_repository,
@@ -34,6 +51,9 @@ class SourceContainerRefreshService:
 
             "observation_validator":
                 observation_validator,
+
+            "source_container_root_service":
+                source_container_root_service,
 
             "source_container_repository":
                 source_container_repository,
@@ -82,6 +102,10 @@ class SourceContainerRefreshService:
 
         self._observation_validator = (
             observation_validator
+        )
+
+        self._source_container_root_service = (
+            source_container_root_service
         )
 
         self._source_container_repository = (
@@ -209,7 +233,7 @@ class SourceContainerRefreshService:
             )
 
             # -------------------------------------------------
-            # Validate complete observation
+            # Validate complete Source observation
             # -------------------------------------------------
 
             validation_started_at = (
@@ -227,6 +251,24 @@ class SourceContainerRefreshService:
             validation_seconds = (
                 perf_counter()
                 - validation_started_at
+            )
+
+            source_observed_count = len(
+                observed_containers
+            )
+
+            # -------------------------------------------------
+            # Add AlphaOmega Source Root Container
+            # -------------------------------------------------
+
+            observed_containers = (
+                self
+                ._source_container_root_service
+                .add_root(
+                    containers=(
+                        observed_containers
+                    )
+                )
             )
 
             # -------------------------------------------------
@@ -251,7 +293,7 @@ class SourceContainerRefreshService:
             )
 
             # -------------------------------------------------
-            # Reconcile observation and persisted catalog
+            # Reconcile catalog hierarchy and persisted catalog
             # -------------------------------------------------
 
             reconciliation_started_at = (
@@ -391,6 +433,14 @@ class SourceContainerRefreshService:
 
                 "source_id":
                     source_id,
+
+                "source_observed":
+                    source_observed_count,
+
+                "catalog_containers":
+                    len(
+                        observed_containers
+                    ),
 
                 "observed":
                     len(

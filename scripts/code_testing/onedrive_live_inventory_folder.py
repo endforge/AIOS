@@ -1,21 +1,21 @@
 """
+OneDrive Live Folder Inventory
+
 Purpose:
-    Read-only controlled OneDrive inventory for the Adventures folder.
+    Performs a live read-only inventory of a selected OneDrive folder using
+    the production Microsoft Graph Connector.
 
-Target:
-    Mimics Tavern
-        -> D&D
-            -> Adventures
+Verifies:
+    - The production GraphConnector can retrieve OneDrive inventory data.
+    - Objects within the selected folder can be identified from live
+      Microsoft Graph results.
+    - Source inventory can be inspected without database persistence.
 
-This script:
-    - Reads OneDrive only.
-    - Locates the exact target folder.
-    - Recursively enumerates the target folder and all descendants.
-    - Uses the existing GraphConnector retrieval helpers.
-    - Prints every folder and file for manual reconciliation.
-    - Does not run Discovery.
-    - Does not retrieve file content.
-    - Does not write to the AlphaOmega database.
+Does NOT:
+    - Modify OneDrive.
+    - Write to the AlphaOmega database.
+    - Perform Extraction or Load.
+    - Create Knowledge Objects.
 """
 
 from collections import Counter

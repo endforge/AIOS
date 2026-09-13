@@ -1,27 +1,24 @@
 """
-Refresh every configured AlphaOmega Source Container catalog.
+AlphaOmega Source Container Refresh Application
 
-This application command runs one complete Source Container Refresh
-for every Source registered in SOURCE_REFRESHES.
+Purpose:
+    Provides the production application entry point for refreshing the
+    persisted Source Container Catalog for registered Sources.
 
-Each Source receives its own:
+Responsibilities:
+    - Define the configured Source registry used by Refresh.
+    - Build SourceContainerRefreshService with the required dependencies.
+    - Select the correct Source-specific container enumerator.
+    - Run each configured Source Refresh independently.
+    - Preserve separate Processing Jobs for separate Sources.
+    - Report per-Source and combined Refresh results.
 
-- Processing Job
-- whole-Source reservation
-- complete Source observation
-- validation
-- catalog reconciliation
-- atomic persistence transaction
-- completion or failure status
-
-This command refreshes Source Container metadata only.
-
-It does not:
-
-- perform initial catalog population
-- retrieve file or page content
-- synchronize Knowledge Objects
-- determine content synchronization scope
+Does NOT:
+    - Implement Source Container enumeration.
+    - Implement reconciliation or persistence rules.
+    - Combine multiple Sources into one Processing Job.
+    - Synchronize source content.
+    - Create Knowledge Objects.
 """
 
 from time import perf_counter
@@ -59,6 +56,9 @@ from scripts.sync.source_container_reconciler import (
 from scripts.sync.source_container_refresh_service import (
     SourceContainerRefreshService,
 )
+from scripts.sync.source_container_root_service import (
+    SourceContainerRootService,
+)
 
 
 PROCESS_TYPE = "source_container_refresh"
@@ -67,19 +67,6 @@ PIPELINE_VERSION = (
     "lab8-production-source-container-refresh"
 )
 
-
-# -------------------------------------------------------------
-# Source Container Refresh registry
-#
-# Adding another Source of Truth requires:
-#
-# 1. A compatible Container enumerator.
-# 2. A registered Source database record.
-# 3. An enumerator import above.
-# 4. One entry in this registry.
-#
-# The shared Refresh workflow does not need to be rewritten.
-# -------------------------------------------------------------
 
 SOURCE_REFRESHES = (
     {
@@ -182,6 +169,10 @@ def build_refresh_service(
             SourceContainerObservationValidator()
         ),
 
+        source_container_root_service=(
+            SourceContainerRootService()
+        ),
+
         source_container_repository=(
             source_container_repository
         ),
@@ -242,87 +233,92 @@ def print_source_result(
     )
 
     print(
-        f"  Observed          : "
-        f"{result['observed']}"
+        "  Source Observed    : "
+        f"{result['source_observed']}"
     )
 
     print(
-        f"  New               : "
+        "  Catalog Containers : "
+        f"{result['catalog_containers']}"
+    )
+
+    print(
+        f"  New                : "
         f"{result['new']}"
     )
 
     print(
-        f"  Existing          : "
+        f"  Existing           : "
         f"{result['existing']}"
     )
 
     print(
-        f"  Reappearing       : "
+        f"  Reappearing        : "
         f"{result['reappearing']}"
     )
 
     print(
-        f"  Absent            : "
+        f"  Absent             : "
         f"{result['absent']}"
     )
 
     print(
-        "  Upserted          : "
+        "  Upserted           : "
         f"{persistence.get('upserted')}"
     )
 
     print(
-        "  Deactivated       : "
+        "  Deactivated        : "
         f"{persistence.get('deactivated')}"
     )
 
     print(
-        "  Payload Size      : "
+        "  Payload Size       : "
         f"{format_bytes(measurements['payload_size_bytes'])}"
     )
 
     print(
-        "  Reservation Time  : "
+        "  Reservation Time   : "
         f"{format_duration(measurements['reservation_seconds'])}"
     )
 
     print(
-        "  Enumeration Time  : "
+        "  Enumeration Time   : "
         f"{format_duration(measurements['enumeration_seconds'])}"
     )
 
     print(
-        "  Validation Time   : "
+        "  Validation Time    : "
         f"{format_duration(measurements['validation_seconds'])}"
     )
 
     print(
-        "  Catalog Read Time : "
+        "  Catalog Read Time  : "
         f"{format_duration(measurements['catalog_read_seconds'])}"
     )
 
     print(
-        "  Reconciliation    : "
+        "  Reconciliation     : "
         f"{format_duration(measurements['reconciliation_seconds'])}"
     )
 
     print(
-        "  Persistence Time  : "
+        "  Persistence Time   : "
         f"{format_duration(measurements['persistence_seconds'])}"
     )
 
     print(
-        "  Job Completion    : "
+        "  Job Completion     : "
         f"{format_duration(measurements['completion_seconds'])}"
     )
 
     print(
-        "  Refresh Total     : "
+        "  Refresh Total      : "
         f"{format_duration(measurements['total_seconds'])}"
     )
 
     print(
-        "  Application Time  : "
+        "  Application Time   : "
         f"{format_duration(elapsed_seconds)}"
     )
 
@@ -443,10 +439,6 @@ def main():
 
     print()
 
-    # ---------------------------------------------------------
-    # Shared authenticated database infrastructure
-    # ---------------------------------------------------------
-
     credential_provider = (
         LocalCredentialProvider()
     )
@@ -492,10 +484,6 @@ def main():
     )
 
     results = []
-
-    # ---------------------------------------------------------
-    # Run every configured Source Refresh
-    # ---------------------------------------------------------
 
     for source_refresh in SOURCE_REFRESHES:
 
@@ -543,17 +531,18 @@ def main():
             result
         )
 
-    # ---------------------------------------------------------
-    # Combined application-operation summary
-    # ---------------------------------------------------------
-
     total_seconds = (
         perf_counter()
         - total_started_at
     )
 
-    total_observed = sum(
-        result["result"]["observed"]
+    total_source_observed = sum(
+        result["result"]["source_observed"]
+        for result in results
+    )
+
+    total_catalog_containers = sum(
+        result["result"]["catalog_containers"]
         for result in results
     )
 
@@ -635,52 +624,57 @@ def main():
     )
 
     print(
-        f"  Sources Refreshed : "
+        f"  Sources Refreshed  : "
         f"{len(results)}"
     )
 
     print(
-        f"  Total Observed    : "
-        f"{total_observed}"
+        f"  Source Observed     : "
+        f"{total_source_observed}"
     )
 
     print(
-        f"  Total New         : "
+        f"  Catalog Containers  : "
+        f"{total_catalog_containers}"
+    )
+
+    print(
+        f"  Total New           : "
         f"{total_new}"
     )
 
     print(
-        f"  Total Existing    : "
+        f"  Total Existing      : "
         f"{total_existing}"
     )
 
     print(
-        f"  Total Reappearing : "
+        f"  Total Reappearing   : "
         f"{total_reappearing}"
     )
 
     print(
-        f"  Total Absent      : "
+        f"  Total Absent        : "
         f"{total_absent}"
     )
 
     print(
-        f"  Total Upserted    : "
+        f"  Total Upserted      : "
         f"{total_upserted}"
     )
 
     print(
-        f"  Total Deactivated : "
+        f"  Total Deactivated   : "
         f"{total_deactivated}"
     )
 
     print(
-        "  Total Payload     : "
+        "  Total Payload       : "
         f"{format_bytes(total_payload_size)}"
     )
 
     print(
-        "  Total Time        : "
+        "  Total Time          : "
         f"{format_duration(total_seconds)}"
     )
 

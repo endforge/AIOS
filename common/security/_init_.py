@@ -1,3 +1,0 @@
-"""
-Shared AlphaOmega security infrastructure.
-"""

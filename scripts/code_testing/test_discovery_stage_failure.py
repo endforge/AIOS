@@ -1,12 +1,20 @@
 """
-File: test_discovery_stage_failure.py
+Discovery Stage Failure Test
 
 Purpose:
     Verifies Discovery stage-level failure behavior.
 
-Test:
-    An unregistered Source of Truth must cause DiscoveryError
-    and terminate the Discovery stage.
+Verifies:
+    - An unregistered Source of Truth causes Discovery to fail.
+    - The failure is raised as a DiscoveryError.
+    - A stage-level failure terminates Discovery rather than continuing
+      record processing.
+
+Does NOT:
+    - Test recoverable record-level failures.
+    - Register or modify Sources.
+    - Perform Extraction or Load.
+    - Modify source data.
 """
 
 from datetime import datetime, timezone

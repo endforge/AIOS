@@ -1,11 +1,22 @@
 """
 AlphaOmega Local Credential Provider
 
-Retrieves secrets from operating-system protected credential storage.
+Purpose:
+    Retrieves AlphaOmega secrets from operating-system protected
+    credential storage through the common CredentialProvider interface.
 
-This is the local implementation of AlphaOmega's Credential Provider.
-It may later be replaced by another provider without changing consuming
-business components.
+Responsibilities:
+    - Retrieve credentials from the local protected credential store.
+    - Validate logical credential names before retrieval.
+    - Use the AlphaOmega service name when accessing local credentials.
+    - Return stored secrets through the common CredentialProvider contract.
+    - Convert provider retrieval failures into controlled runtime errors.
+
+Does NOT:
+    - Store or modify credentials.
+    - Expose provider-generated exception details.
+    - Define credential consumers.
+    - Require consuming components to depend directly on keyring.
 """
 
 import keyring

@@ -1,9 +1,22 @@
 """
-File: connector_section.py
+AlphaOmega Connector Section
 
 Purpose:
     Stores the completed raw output produced by the Connector stage
     during a synchronization run.
+
+Responsibilities:
+    - Store raw source objects produced by the Connector stage.
+    - Store Connector-stage record errors.
+    - Record whether Connector processing succeeded.
+    - Provide completed Connector output through the shared synchronization
+      section contract.
+
+Does NOT:
+    - Connect to a Source of Truth.
+    - Retrieve source objects itself.
+    - Translate raw source objects.
+    - Modify Connector output after the section is locked.
 """
 
 from scripts.sync.sync_base_section import BaseSection

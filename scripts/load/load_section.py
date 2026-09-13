@@ -1,9 +1,22 @@
 """
-File: load_section.py
+AlphaOmega Load Section
 
 Purpose:
-    Stores the output produced by the Load stage
-    during a synchronization run.
+    Stores the completed output produced by the Load stage during a
+    synchronization run.
+
+Responsibilities:
+    - Store LoadRecords produced by Load.
+    - Store record-level Load errors.
+    - Record whether Load completed successfully.
+    - Provide completed Load output through the shared synchronization
+      section contract.
+
+Does NOT:
+    - Execute Load itself.
+    - Determine synchronization state.
+    - Modify upstream stage records.
+    - Allow modification after the section is locked.
 """
 
 from scripts.sync.sync_base_section import BaseSection

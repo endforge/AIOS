@@ -1,33 +1,24 @@
 """
-File:
-    test_onenote_live_orchestrator_unchanged.py
+Live OneNote Orchestrator UNCHANGED Test
 
 Purpose:
-    Controlled live multi-record OneNote UNCHANGED synchronization test.
+    Validates a controlled live multi-record OneNote UNCHANGED synchronization
+    run through SynchronizationOrchestrator.
 
-Target:
-    OneNote
-        Notebook: Mimic's Tavern
-        Section:  House Rules
+Verifies:
+    - Pretest persisted state can be captured for the controlled scope.
+    - Existing OneNote content is classified correctly when source facts
+      remain unchanged.
+    - UNCHANGED records do not proceed through unnecessary Extraction or Load.
+    - Existing Knowledge Object state remains unchanged.
+    - Synchronization associations reconcile to the expected counts.
+    - The Processing Job completes successfully.
 
-Expected production behavior:
-    - Connector enumerates:
-        1 CONTAINER
-        16 CONTENT
-    - 17 SynchronizationAssociations
-    - 17 TranslatorRecords
-    - CONTAINER stops successfully after Translator
-    - 16 CONTENT records enter Discovery
-    - all 16 CONTENT records are UNCHANGED
-    - no CONTENT record enters Extraction
-    - Load does not execute
-    - no Sync History events are created
-    - all 16 existing Knowledge Objects remain unchanged
-    - Processing Job completes successfully
-
-IMPORTANT:
-    This test creates a Processing Job in AlphaOmega.
-    It must NOT modify Knowledge Objects or create Sync History events.
+Does NOT:
+    - Modify existing Knowledge Objects for UNCHANGED records.
+    - Synchronize the complete OneNote Source of Truth.
+    - Modify OneNote source content.
+    - Test the NEW-only or MODIFIED-only scenario.
 """
 
 from common.object_types import (

@@ -1,12 +1,28 @@
 """
-File: discovery_service.py
+AlphaOmega Discovery Service
 
 Purpose:
-    Executes the Discovery stage.
+    Executes the Discovery stage by comparing translated source facts with
+    persisted AlphaOmega Knowledge Object facts.
 
-Discovery compares trusted Translator output against the Canonical
-Knowledge Repository and determines whether each translated source
-object is NEW, MODIFIED, or UNCHANGED.
+Responsibilities:
+    - Resolve registered Source identity.
+    - Reuse Source identity within a Discovery run.
+    - Locate existing Knowledge Objects by source identity.
+    - Classify records as NEW, MODIFIED, or UNCHANGED.
+    - Record factual comparison reasons.
+    - Determine whether Extraction is required.
+    - Preserve orchestration correlation identity.
+    - Isolate record-level Discovery failures.
+    - Report stage-level Discovery failures.
+    - Produce and lock the completed DiscoverySection.
+
+Does NOT:
+    - Retrieve source content.
+    - Modify Translator-owned facts.
+    - Perform Extraction or Load.
+    - Persist Knowledge Object changes.
+    - Perform semantic interpretation.
 """
 
 from scripts.discovery.discovery_record import DiscoveryRecord

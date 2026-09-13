@@ -1,45 +1,36 @@
 """
-File:
-    sync_orchestrator.py
+AlphaOmega Synchronization Orchestrator
 
 Purpose:
-    Coordinates execution of one AlphaOmega synchronization run.
+    Coordinates execution of the AlphaOmega synchronization pipeline for one
+    requested Source.
 
-The Synchronization Orchestrator owns:
-    - Processing Job lifecycle.
-    - Connector execution.
-    - Correlation identity creation after Connector and before Translator.
-    - Cross-stage SynchronizationAssociation construction.
-    - Translator execution.
-    - Routing of canonical CONTENT records into Discovery.
-    - Discovery execution.
-    - Routing of eligible records into Extraction.
-    - Extraction execution for NEW/MODIFIED CONTENT records.
-    - Load execution for successfully extracted NEW CONTENT records and
-      MODIFIED CONTENT records whose canonical content changed.
-    - Stage-level failure control flow.
+Responsibilities:
+    - Support the existing synchronization path that creates its own
+      Processing Job and executes its configured Connector.
+    - Support the production application path that consumes an already
+      reserved Processing Job and completed ConnectorSection.
+    - Assign orchestration correlation identity before Translation.
+    - Execute Translator processing.
+    - Preserve CONTAINER objects at their synchronization boundary.
+    - Execute Discovery for eligible CONTENT.
+    - Route NEW and MODIFIED records requiring Extraction.
+    - Execute Extraction for eligible records.
+    - Stop MODIFIED records before Load when canonical content is unchanged.
+    - Execute Load for eligible changed content.
+    - Maintain cross-stage synchronization associations.
+    - Complete or fail the applicable Processing Job based on execution
+      outcome.
 
-The Synchronization Orchestrator does NOT:
-    - Decide what the user wants synchronized.
-    - Implement source-specific retrieval logic.
-    - Translate source metadata.
-    - Determine synchronization state.
-    - Extract canonical content.
-    - Persist Knowledge Objects directly.
-    - Generate stage-owned data.
-
-Canonical CONTAINER records:
-    - Receive orchestration correlation identity.
-    - Receive SynchronizationAssociation objects.
-    - Pass through Translator.
-    - Stop successfully after Translator.
-    - Do not enter Discovery.
-    - Do not enter Extraction.
-    - Do not enter Load.
-    - Do not become Knowledge Objects.
-
-A synchronization request is supplied by a future request/application
-layer.
+Does NOT:
+    - Provide UI presentation.
+    - Perform application-layer synchronization admission.
+    - Select synchronization scope.
+    - Refresh the Source Container Catalog.
+    - Reserve synchronization.
+    - Create a second Processing Job for an already-reserved synchronization.
+    - Reimplement stage-owned business logic.
+    - Treat CONTAINER objects as Knowledge Objects.
 """
 
 from common.object_types import (
@@ -109,6 +100,13 @@ class SynchronizationOrchestrator:
     ):
         """
         Initialize orchestration dependencies.
+
+        connector remains required for the existing self-created-job
+        execution path.
+
+        Reserved execution receives its completed ConnectorSection from the
+        production application boundary and therefore does not invoke this
+        configured Connector.
         """
 
         if connector is None:
@@ -153,15 +151,19 @@ class SynchronizationOrchestrator:
 
         self._connector = connector
         self._translator = translator
+
         self._discovery_service = (
             discovery_service
         )
+
         self._extraction_service = (
             extraction_service
         )
+
         self._load_service = (
             load_service
         )
+
         self._processing_job_repository = (
             processing_job_repository
         )
@@ -172,6 +174,10 @@ class SynchronizationOrchestrator:
             ).strip()
         )
 
+    # ========================================================================
+    # Existing Execution Path
+    # ========================================================================
+
     def run(
         self,
         *,
@@ -179,16 +185,18 @@ class SynchronizationOrchestrator:
         job_metadata=None,
     ):
         """
-        Execute one synchronization run.
+        Execute the existing synchronization path.
 
-        Current first-version request contract:
-            source_name
+        This path preserves the established Lab 7 behavior:
 
-        Scope selection remains a future request-layer concern.
+            1. Create Processing Job.
+            2. Execute configured Connector.
+            3. Execute the synchronization pipeline.
+            4. Complete or fail the created Processing Job.
 
-        Returns:
-            dict:
-                Synchronization run outputs and summary counts.
+        This method remains available for existing callers that have not
+        already reserved synchronization through the Lab 8 application
+        boundary.
         """
 
         self._validate_run_request(
@@ -202,10 +210,6 @@ class SynchronizationOrchestrator:
 
         try:
 
-            # ================================================================
-            # Processing Job
-            # ================================================================
-
             processing_job_id = (
                 self._processing_job_repository.create(
                     process_type="sync",
@@ -216,260 +220,409 @@ class SynchronizationOrchestrator:
                 )
             )
 
-            # ================================================================
-            # Connector
-            # ================================================================
-
             connector_section = (
                 self._connector.run(
                     source_name
                 )
             )
 
-            self._validate_locked_section(
-                connector_section,
-                "ConnectorSection",
-            )
-
-            # ================================================================
-            # Correlation Boundary
-            #
-            # TranslationInput assigns one orchestration-owned
-            # correlation UUID to each Connector object.
-            # ================================================================
-
-            translation_input = (
-                TranslationInput(
+            return self._execute_pipeline(
+                processing_job_id=(
+                    processing_job_id
+                ),
+                connector_section=(
                     connector_section
+                ),
+            )
+
+        except Exception as error:
+
+            self._fail_processing_job(
+                processing_job_id=(
+                    processing_job_id
+                ),
+                error=error,
+            )
+
+            raise
+
+    # ========================================================================
+    # Reserved Production Execution Path
+    # ========================================================================
+
+    def run_reserved(
+        self,
+        *,
+        processing_job_id,
+        connector_section,
+    ):
+        """
+        Execute synchronization using an already-reserved Processing Job.
+
+        This is the production Lab 8 orchestration entry point.
+
+        The synchronization application boundary is responsible for:
+
+            - persisted admission;
+            - preliminary conflict information;
+            - Source-of-Truth validation;
+            - authoritative atomic reservation;
+            - Source-specific synchronization scope selection;
+            - Connector execution for the authorized scope.
+
+        By the time this method is called:
+
+            - processing_job_id already exists;
+            - the Processing Job is already running;
+            - the Synchronization Run already exists;
+            - Connector execution has completed;
+            - connector_section represents only the authorized scope.
+
+        This method MUST NOT create another Processing Job.
+        """
+
+        processing_job_id = (
+            self._require_text(
+                processing_job_id,
+                "processing_job_id",
+            )
+        )
+
+        if connector_section is None:
+            raise ValueError(
+                "connector_section is required."
+            )
+
+        try:
+
+            return self._execute_pipeline(
+                processing_job_id=(
+                    processing_job_id
+                ),
+                connector_section=(
+                    connector_section
+                ),
+            )
+
+        except Exception as error:
+
+            self._fail_processing_job(
+                processing_job_id=(
+                    processing_job_id
+                ),
+                error=error,
+            )
+
+            raise
+
+    # ========================================================================
+    # Shared Synchronization Pipeline
+    # ========================================================================
+
+    def _execute_pipeline(
+        self,
+        *,
+        processing_job_id,
+        connector_section,
+    ):
+        """
+        Execute the common synchronization pipeline from Connector output.
+
+        Both execution paths converge here.
+
+        This method owns:
+
+            ConnectorSection validation
+                ↓
+            TranslationInput
+                ↓
+            SynchronizationAssociation construction
+                ↓
+            Translator
+                ↓
+            Discovery routing
+                ↓
+            Discovery
+                ↓
+            Extraction routing
+                ↓
+            Extraction
+                ↓
+            Load routing
+                ↓
+            Load
+                ↓
+            Processing Job completion
+
+        Processing Job creation and Connector selection intentionally occur
+        outside this shared method.
+        """
+
+        # ====================================================================
+        # Connector
+        # ====================================================================
+
+        self._validate_locked_section(
+            connector_section,
+            "ConnectorSection",
+        )
+
+        # ====================================================================
+        # Correlation Boundary
+        #
+        # TranslationInput assigns one orchestration-owned correlation UUID
+        # to each Connector object.
+        # ====================================================================
+
+        translation_input = (
+            TranslationInput(
+                connector_section
+            )
+        )
+
+        # ====================================================================
+        # Build Associations
+        #
+        # Associations exist for every Connector object before Translator
+        # begins.
+        #
+        # This includes both canonical CONTENT and CONTAINER objects.
+        # ====================================================================
+
+        associations = (
+            self._create_associations(
+                translation_input
+            )
+        )
+
+        # ====================================================================
+        # Translator
+        # ====================================================================
+
+        translator_section = (
+            self._translator.run(
+                translation_input
+            )
+        )
+
+        self._validate_locked_section(
+            translator_section,
+            "TranslatorSection",
+        )
+
+        self._attach_translator_records(
+            associations=associations,
+            translator_section=(
+                translator_section
+            ),
+        )
+
+        # ====================================================================
+        # Discovery Routing
+        #
+        # Translator owns the complete TranslatorSection.
+        #
+        # Orchestration owns routing.
+        #
+        # Only canonical CONTENT records are eligible to enter Discovery.
+        #
+        # CONTAINER records terminate successfully after Translator.
+        # Their SynchronizationAssociation remains available for correlation,
+        # diagnostics, and hierarchy traceability.
+        # ====================================================================
+
+        discovery_records = (
+            self._select_discovery_records(
+                translator_section
+            )
+        )
+
+        discovery_section = None
+
+        if discovery_records:
+
+            discovery_input = (
+                _DiscoveryInputView(
+                    discovery_records
                 )
             )
 
             # ================================================================
-            # Build Associations
-            #
-            # Associations exist for every Connector object before
-            # Translator begins.
-            #
-            # This includes both canonical CONTENT and CONTAINER objects.
+            # Discovery
             # ================================================================
 
-            associations = (
-                self._create_associations(
-                    translation_input
-                )
-            )
-
-            # ================================================================
-            # Translator
-            # ================================================================
-
-            translator_section = (
-                self._translator.run(
-                    translation_input
+            discovery_section = (
+                self._discovery_service.run(
+                    discovery_input
                 )
             )
 
             self._validate_locked_section(
-                translator_section,
-                "TranslatorSection",
+                discovery_section,
+                "DiscoverySection",
             )
 
-            self._attach_translator_records(
+            self._attach_discovery_records(
                 associations=associations,
-                translator_section=(
-                    translator_section
+                discovery_section=(
+                    discovery_section
+                ),
+            )
+
+        # ====================================================================
+        # Extraction Routing
+        # ====================================================================
+
+        extraction_associations = (
+            self._select_extraction_associations(
+                associations
+            )
+        )
+
+        extraction_section = None
+        load_section = None
+
+        if extraction_associations:
+
+            extraction_inputs = [
+                association.translator_record
+                for association
+                in extraction_associations
+            ]
+
+            # ================================================================
+            # Extraction
+            # ================================================================
+
+            extraction_section = (
+                self._extraction_service.run(
+                    extraction_inputs
+                )
+            )
+
+            self._validate_locked_section(
+                extraction_section,
+                "ExtractionSection",
+            )
+
+            self._attach_extraction_records(
+                associations=(
+                    extraction_associations
+                ),
+                extraction_section=(
+                    extraction_section
                 ),
             )
 
             # ================================================================
-            # Discovery Routing
+            # Load Routing
             #
-            # Translator owns the complete TranslatorSection.
+            # Records with Extraction record-level failures have no
+            # ExtractionRecord and therefore stop here.
             #
-            # Orchestration owns routing.
-            #
-            # Only canonical CONTENT records are eligible to enter
-            # Discovery.
-            #
-            # CONTAINER records terminate successfully after Translator.
-            # Their SynchronizationAssociation remains available for
-            # correlation, diagnostics, and hierarchy traceability.
+            # MODIFIED records whose extracted content hash matches the
+            # previous stored content hash also stop here because canonical
+            # content did not change.
             # ================================================================
 
-            discovery_records = (
-                self._select_discovery_records(
-                    translator_section
+            load_associations = (
+                self._select_load_associations(
+                    extraction_associations
                 )
             )
 
-            discovery_section = None
+            if load_associations:
 
-            if discovery_records:
-
-                discovery_input = (
-                    _DiscoveryInputView(
-                        discovery_records
-                    )
-                )
-
-                # ============================================================
-                # Discovery
-                # ============================================================
-
-                discovery_section = (
-                    self._discovery_service.run(
-                        discovery_input
+                load_section = (
+                    self._load_service.run(
+                        associations=(
+                            load_associations
+                        ),
+                        processing_job_id=(
+                            processing_job_id
+                        ),
                     )
                 )
 
                 self._validate_locked_section(
-                    discovery_section,
-                    "DiscoverySection",
-                )
-
-                self._attach_discovery_records(
-                    associations=associations,
-                    discovery_section=(
-                        discovery_section
-                    ),
-                )
-
-            # ================================================================
-            # Extraction Routing
-            # ================================================================
-
-            extraction_associations = (
-                self._select_extraction_associations(
-                    associations
-                )
-            )
-
-            extraction_section = None
-            load_section = None
-
-            if extraction_associations:
-
-                extraction_inputs = [
-                    association.translator_record
-                    for association
-                    in extraction_associations
-                ]
-
-                # ============================================================
-                # Extraction
-                # ============================================================
-
-                extraction_section = (
-                    self._extraction_service.run(
-                        extraction_inputs
-                    )
-                )
-
-                self._validate_locked_section(
-                    extraction_section,
-                    "ExtractionSection",
-                )
-
-                self._attach_extraction_records(
-                    associations=(
-                        extraction_associations
-                    ),
-                    extraction_section=(
-                        extraction_section
-                    ),
-                )
-
-                # ============================================================
-                # Load Routing
-                #
-                # Records with Extraction record-level failures have no
-                # ExtractionRecord and therefore stop here.
-                #
-                # MODIFIED records whose extracted content hash matches
-                # the previous stored content hash also stop here because
-                # canonical content did not change.
-                # ============================================================
-
-                load_associations = (
-                    self._select_load_associations(
-                        extraction_associations
-                    )
-                )
-
-                if load_associations:
-
-                    load_section = (
-                        self._load_service.run(
-                            associations=(
-                                load_associations
-                            ),
-                            processing_job_id=(
-                                processing_job_id
-                            ),
-                        )
-                    )
-
-                    self._validate_locked_section(
-                        load_section,
-                        "LoadSection",
-                    )
-
-            # ================================================================
-            # Complete Processing Job
-            # ================================================================
-
-            self._processing_job_repository.complete(
-                processing_job_id
-            )
-
-            return {
-                "processing_job_id":
-                    processing_job_id,
-
-                "connector_section":
-                    connector_section,
-
-                "translator_section":
-                    translator_section,
-
-                "discovery_section":
-                    discovery_section,
-
-                "extraction_section":
-                    extraction_section,
-
-                "load_section":
                     load_section,
+                    "LoadSection",
+                )
 
-                "associations":
-                    tuple(
-                        associations.values()
-                    ),
+        # ====================================================================
+        # Complete Processing Job
+        # ====================================================================
 
-                "counts":
-                    self._build_counts(
-                        associations
-                    ),
-            }
+        self._processing_job_repository.complete(
+            processing_job_id
+        )
 
-        except Exception as error:
+        return {
+            "processing_job_id":
+                processing_job_id,
 
-            if processing_job_id is not None:
+            "connector_section":
+                connector_section,
 
-                try:
-                    self._processing_job_repository.fail(
-                        processing_job_id,
-                        error,
-                    )
+            "translator_section":
+                translator_section,
 
-                except Exception as job_error:
+            "discovery_section":
+                discovery_section,
 
-                    raise RuntimeError(
-                        "Synchronization failed and the "
-                        "Processing Job could not be marked failed."
-                    ) from job_error
+            "extraction_section":
+                extraction_section,
 
-            raise
+            "load_section":
+                load_section,
+
+            "associations":
+                tuple(
+                    associations.values()
+                ),
+
+            "counts":
+                self._build_counts(
+                    associations
+                ),
+        }
+
+    # ========================================================================
+    # Processing Job Failure
+    # ========================================================================
+
+    def _fail_processing_job(
+        self,
+        *,
+        processing_job_id,
+        error,
+    ):
+        """
+        Fail the applicable Processing Job after synchronization failure.
+
+        No action occurs when a Processing Job has not yet been established.
+
+        If synchronization fails and the Processing Job also cannot be marked
+        failed, raise a lifecycle error because persisted execution state can
+        no longer be trusted.
+        """
+
+        if processing_job_id is None:
+            return
+
+        try:
+
+            self._processing_job_repository.fail(
+                processing_job_id,
+                error,
+            )
+
+        except Exception as job_error:
+
+            raise RuntimeError(
+                "Synchronization failed and the "
+                "Processing Job could not be marked failed."
+            ) from job_error
 
     # ========================================================================
     # Association Construction
@@ -600,8 +753,7 @@ class SynchronizationOrchestrator:
         discovery_section,
     ):
         """
-        Attach successfully discovered CONTENT records
-        by correlation ID.
+        Attach successfully discovered CONTENT records by correlation ID.
         """
 
         for discovery_record in (
@@ -734,9 +886,9 @@ class SynchronizationOrchestrator:
         MODIFIED records proceed to Load only when the newly extracted
         canonical content hash differs from the previous stored hash.
 
-        A MODIFIED record with matching hashes remains MODIFIED and
-        retains its ExtractionRecord, but stops before Load because
-        canonical content did not change.
+        A MODIFIED record with matching hashes remains MODIFIED and retains
+        its ExtractionRecord, but stops before Load because canonical content
+        did not change.
         """
 
         eligible = []
@@ -1032,7 +1184,7 @@ class SynchronizationOrchestrator:
         source_name,
     ):
         """
-        Validate the current minimal synchronization request.
+        Validate the existing synchronization request.
         """
 
         if (
@@ -1044,3 +1196,26 @@ class SynchronizationOrchestrator:
             raise ValueError(
                 "source_name is required."
             )
+
+    @staticmethod
+    def _require_text(
+        value,
+        field_name,
+    ):
+        """
+        Require one non-empty text value.
+        """
+
+        if (
+            value is None
+            or not str(
+                value
+            ).strip()
+        ):
+            raise ValueError(
+                f"{field_name} is required."
+            )
+
+        return str(
+            value
+        ).strip()

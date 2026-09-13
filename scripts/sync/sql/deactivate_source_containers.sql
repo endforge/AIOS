@@ -1,3 +1,20 @@
+-- Deactivate Source Containers
+--
+-- Purpose:
+--     Deactivates persisted Source Containers proven absent by an approved
+--     complete Source Container Refresh.
+--
+-- Responsibilities:
+--     - Mark the supplied Source Containers inactive.
+--     - Apply deactivation to the persisted source_containers catalog.
+--     - Preserve catalog records rather than deleting them.
+--
+-- Does NOT:
+--     - Determine which Source Containers are absent.
+--     - Accept incomplete enumeration as proof of absence.
+--     - Enumerate a Source of Truth.
+--     - Synchronize content.
+
 CREATE OR REPLACE FUNCTION public.deactivate_source_containers(
     p_source_id uuid,
     p_processing_job_id uuid,

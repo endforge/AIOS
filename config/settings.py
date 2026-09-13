@@ -1,3 +1,23 @@
+"""
+AlphaOmega Configuration Settings
+
+Purpose:
+    Loads required local AlphaOmega configuration settings used by
+    Microsoft Graph connectivity.
+
+Responsibilities:
+    - Load configuration values from the config .env file.
+    - Retrieve required settings from the process environment.
+    - Fail when a required configuration setting is unavailable.
+    - Expose the configured Microsoft Graph client ID.
+
+Does NOT:
+    - Retrieve protected credentials.
+    - Store or modify configuration values.
+    - Authenticate to Microsoft Graph.
+    - Establish Microsoft Graph connections.
+"""
+
 import os
 from pathlib import Path
 

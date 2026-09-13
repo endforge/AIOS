@@ -1,10 +1,20 @@
 """
-Credential Provider Test
+Local Credential Provider Test
 
-Verifies that AlphaOmega can retrieve the Supabase service identity
-credential through the Credential Provider abstraction.
+Purpose:
+    Validates the local AlphaOmega credential-provider implementation.
 
-The credential value is never displayed.
+Verifies:
+    - Valid logical credential names can be submitted for retrieval.
+    - Invalid credential names are rejected.
+    - Missing or unavailable credentials produce controlled failures.
+    - Credential retrieval follows the LocalCredentialProvider contract.
+
+Does NOT:
+    - Create or modify stored credentials.
+    - Expose credential values as test output.
+    - Test Microsoft Graph authentication.
+    - Test database connectivity.
 """
 
 from common.security.local_credential_provider import (

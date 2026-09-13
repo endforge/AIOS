@@ -1,65 +1,32 @@
 """
-File: test_graph_pipeline_discovery_sample.py
+Microsoft Graph Discovery Pipeline Sample Test
 
 Purpose:
-    End-to-end AlphaOmega sample pipeline validation.
+    Validates a small deterministic live AlphaOmega pipeline from Microsoft
+    Graph through Connector, Translator, and Discovery.
 
-Pipeline:
-    Microsoft Graph
-        ->
-    Connector
-        ->
-    Translator
-        ->
-    Discovery
-        ->
-    Canonical Knowledge Repository comparison
-
-This test uses the same small, deterministic Microsoft Graph datasets
-already used by the Connector -> Translator regression test.
-
-OneDrive target:
-    Writings and every descendant beneath Writings.
-
-OneNote targets:
-    Games -> Minecraft
-    Mimic's Tavern -> Homebrew
-
-The test validates:
-
-Connector
-    - Sample source retrieval completes successfully.
-    - Connector output is locked and trusted.
-
-Translator
-    - Translator completes successfully.
-    - Every Connector object is accounted for.
-    - Translator output is locked and trusted.
-
-Discovery
-    - Discovery executes against real Translator output.
+Verifies:
+    - Sample Microsoft Graph source retrieval completes successfully.
+    - Connector output completes and locks correctly.
+    - Translator accounts for Connector objects and locks its output.
+    - Discovery operates against real Translator output.
     - Source identity resolves through SourceRepository.
-    - Knowledge Object lookup executes through KnowledgeObjectRepository.
-    - Every successfully translated record receives exactly one
-      Discovery result or one Discovery record-level error.
-    - Discovery produces only:
-        NEW
-        MODIFIED
-        UNCHANGED
-    - NEW requires extraction.
-    - MODIFIED requires extraction.
-    - UNCHANGED does not require extraction.
-    - Existing Knowledge Objects preserve knowledge_object_id.
-    - Existing Knowledge Objects preserve previous_content_hash.
-    - Discovery output is locked and trusted.
+    - Knowledge Object comparison executes through
+      KnowledgeObjectRepository.
+    - Successfully translated records receive a Discovery result or a
+      record-level Discovery error.
+    - Discovery produces only NEW, MODIFIED, or UNCHANGED states.
+    - NEW and MODIFIED records require Extraction.
+    - UNCHANGED records do not require Extraction.
+    - Existing Knowledge Object identity and previous content hash are
+      preserved.
+    - Discovery output completes and locks correctly.
 
-Security / Database
-    - Uses AlphaOmega Credential Provider.
-    - Uses authenticated DatabaseConnection.
-    - Uses RLS-constrained repository access.
-    - Performs no INSERT, UPDATE, or DELETE operations.
-
-This test is intentionally read-only.
+Does NOT:
+    - Perform Extraction.
+    - Perform Load.
+    - Insert, update, or delete Knowledge Objects.
+    - Modify Microsoft Graph source data.
 """
 
 from collections import Counter

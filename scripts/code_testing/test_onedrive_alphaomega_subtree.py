@@ -1,3 +1,24 @@
+"""
+OneDrive AlphaOmega Subtree Test
+
+Purpose:
+    Validates selection of the AlphaOmega subtree from a complete live
+    OneDrive container observation.
+
+Verifies:
+    - OneDrive container enumeration completes successfully.
+    - The complete observation passes Source Container validation.
+    - The AlphaOmega subtree can be identified from the complete observation.
+    - Selected subtree membership follows the observed OneDrive hierarchy.
+
+Does NOT:
+    - Persist the selected subtree.
+    - Modify OneDrive.
+    - Synchronize file content.
+    - Create Knowledge Objects.
+"""
+
+
 from scripts.connectors.ms_graph.onedrive_container_enumerator import (
     OneDriveContainerEnumerator,
 )

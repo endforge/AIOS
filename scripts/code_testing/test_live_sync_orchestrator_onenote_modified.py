@@ -1,23 +1,26 @@
 """
-File: test_live_sync_orchestrator_onenote_modified.py
+Live OneNote Synchronization Orchestrator MODIFIED Test
 
 Purpose:
-    Targeted live end-to-end AlphaOmega synchronization test
-    conducted by SynchronizationOrchestrator.
+    Validates a targeted live end-to-end MODIFIED synchronization run
+    conducted by SynchronizationOrchestrator for one known OneNote page.
 
-Target:
-    OneNote:
-        Blacksmith Lingo
+Verifies:
+    - The controlled OneNote target begins with an existing Knowledge Object.
+    - SynchronizationOrchestrator executes the production synchronization
+      stages for exactly one targeted OneNote page.
+    - Discovery classifies the controlled page as MODIFIED.
+    - Eligible MODIFIED content proceeds through Extraction and Load.
+    - The existing Knowledge Object is updated rather than assigned a new
+      identity.
+    - The resulting database state is verified after orchestration.
+    - The Processing Job completes successfully.
 
-This test intentionally limits Connector scope to exactly one known
-OneNote page.
-
-IMPORTANT:
-    This test WRITES to AlphaOmega.
-
-Expected current state:
-    The controlled OneNote page is expected to be MODIFIED relative
-    to its existing Knowledge Object.
+Does NOT:
+    - Synchronize the complete OneNote Source of Truth.
+    - Test the NEW synchronization path.
+    - Test the UNCHANGED synchronization path.
+    - Modify the OneNote source page.
 """
 
 from common.security.local_credential_provider import (

@@ -1,13 +1,22 @@
 """
-File: translation_input.py
+AlphaOmega Translation Input
 
 Purpose:
     Creates the orchestration-owned Translator input produced from a
-    completed ConnectorSection.
+    completed Connector Section.
 
-The TranslationInput preserves the completed Connector output without
-modifying it and assigns one run-scoped correlation UUID to each source
-object before Translator processing begins.
+Responsibilities:
+    - Preserve completed Connector output for Translator processing.
+    - Assign one run-scoped correlation UUID to each source object before
+      Translator processing begins.
+    - Provide the Translator with source objects and their correlation
+      identities without modifying Connector output.
+
+Does NOT:
+    - Modify completed Connector output.
+    - Translate source objects.
+    - Determine canonical object types.
+    - Perform Discovery, Extraction, or Load processing.
 """
 
 from types import MappingProxyType

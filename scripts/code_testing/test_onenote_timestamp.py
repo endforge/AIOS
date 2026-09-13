@@ -1,21 +1,22 @@
 """
-File:
-    test_onenote_timestamp.py
+OneNote Timestamp Diagnostic
 
 Purpose:
-    READ-ONLY diagnostic for OneNote timestamp behavior.
+    Provides a read-only diagnostic of OneNote timestamp behavior for the
+    controlled House Rules Section.
 
-Target:
-    Notebook: Mimic's Tavern
-    Section:  House Rules
+Verifies:
+    - Graph page lastModifiedDateTime can be inspected.
+    - Graph Section lastModifiedDateTime can be inspected.
+    - TranslatorRecord.source_modified_at can be inspected.
+    - Stored Knowledge Object source_modified_at can be inspected.
+    - Source, translated, and persisted timestamps can be compared.
 
-For every page, compare:
-    - Graph page lastModifiedDateTime
-    - Graph section lastModifiedDateTime
-    - TranslatorRecord.source_modified_at
-    - stored Knowledge Object source_modified_at
-
-This script performs NO AlphaOmega writes.
+Does NOT:
+    - Modify OneNote.
+    - Modify Knowledge Objects.
+    - Execute Load.
+    - Perform AlphaOmega database writes.
 """
 
 from common.security.local_credential_provider import (

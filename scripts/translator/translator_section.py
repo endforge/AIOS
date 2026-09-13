@@ -1,9 +1,22 @@
 """
-File: translator_section.py
+AlphaOmega Translator Section
 
 Purpose:
-    Stores the output produced by the Translator stage
-    during a synchronization run.
+    Stores the completed output produced by the Translator stage during a
+    synchronization run.
+
+Responsibilities:
+    - Store TranslatorRecords produced by Translation.
+    - Store record-level Translator errors.
+    - Record whether Translation completed successfully.
+    - Provide completed Translator output through the shared synchronization
+      section contract.
+
+Does NOT:
+    - Translate source objects itself.
+    - Retrieve source data.
+    - Perform Discovery, Extraction, or Load.
+    - Allow modification after the section is locked.
 """
 
 from scripts.sync.sync_base_section import BaseSection

@@ -1,17 +1,25 @@
 """
-File: test_processing_job_repository.py
+Processing Job Repository Test
 
 Purpose:
-    Isolated tests for ProcessingJobRepository.
+    Provides isolated validation of ProcessingJobRepository using mocked
+    database behavior.
 
-These tests verify:
-    - Processing Job creation.
-    - Processing Job completion.
-    - Processing Job failure.
-    - Required input validation.
-    - Database response validation.
+Verifies:
+    - Processing Jobs can be created.
+    - Processing Jobs can be completed.
+    - Processing Jobs can be failed.
+    - Required creation inputs are validated.
+    - Processing Job identities are validated.
+    - Database responses must contain the expected single record.
+    - Failure operations require error information.
+    - Missing database clients are rejected.
 
-No live AlphaOmega database operations are performed.
+Does NOT:
+    - Connect to the live AlphaOmega database.
+    - Execute synchronization stages.
+    - Decide Processing Job lifecycle state.
+    - Modify production Processing Jobs.
 """
 
 from unittest.mock import Mock

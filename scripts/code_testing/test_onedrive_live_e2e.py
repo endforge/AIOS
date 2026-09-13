@@ -1,17 +1,24 @@
 """
-test_onedrive_live_e2e.py
+Live OneDrive End-to-End Synchronization Test
 
-Controlled live OneDrive end-to-end synchronization test.
+Purpose:
+    Validates a controlled live OneDrive synchronization path through the
+    production AlphaOmega synchronization components.
 
-Every execution performs the same bounded synchronization request:
+Verifies:
+    - The controlled OneDrive scope can be retrieved.
+    - Connector and Translator output preserve expected source facts.
+    - Discovery produces the expected synchronization decisions.
+    - Eligible CONTENT proceeds through Extraction and Load.
+    - CONTAINER objects respect the orchestration boundary.
+    - Persistence results match synchronization decisions.
+    - Processing Job state reflects the completed synchronization run.
 
-    OneDrive / David / Book Ideas / recursive
-
-The test does not prescribe object counts or synchronization states.
-It reports what the Source of Truth contains and verifies that the
-pipeline and database aftermath reconcile to what was actually observed.
-
-WARNING: THIS TEST WRITES TO ALPHAOMEGA.
+Does NOT:
+    - Synchronize the complete OneDrive Source of Truth.
+    - Modify OneDrive source content.
+    - Bypass production synchronization stage boundaries.
+    - Treat CONTAINER objects as Knowledge Objects.
 """
 
 from datetime import datetime

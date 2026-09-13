@@ -1,9 +1,21 @@
 """
-File: test_extraction_foundation.py
+Extraction Foundation Test
 
 Purpose:
-    Verify the foundational Extraction components before
-    implementing the Extraction service.
+    Validates the foundational Extraction record and section contracts.
+
+Verifies:
+    - ExtractionRecord stores canonical extracted content and metadata.
+    - ExtractionRecord validates required Extraction data.
+    - ExtractionSection stores Extraction records and record-level errors.
+    - ExtractionSection follows the shared synchronization section contract.
+    - Completed Extraction output can be locked against modification.
+
+Does NOT:
+    - Retrieve live source content.
+    - Execute the complete ExtractionService.
+    - Perform Load.
+    - Persist Knowledge Objects.
 """
 
 from scripts.extraction.content_hasher import ContentHasher

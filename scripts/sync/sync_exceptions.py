@@ -1,8 +1,22 @@
 """
-Synchronization exceptions.
+AlphaOmega Synchronization Exceptions
 
-Custom exceptions used throughout the AlphaOmega
-Synchronization Framework.
+Purpose:
+    Defines the custom exception types used by the AlphaOmega
+    Synchronization Framework.
+
+Responsibilities:
+    - Provide synchronization-specific exception types.
+    - Distinguish stage, record, validation, configuration, connection,
+      source, object-type, and section-lock failures.
+    - Provide shared exception types that synchronization components can
+      raise and handle consistently.
+
+Does NOT:
+    - Detect synchronization failures.
+    - Handle or recover from raised exceptions.
+    - Perform logging.
+    - Execute synchronization processing.
 """
 
 

@@ -1,18 +1,25 @@
 """
-Controlled test for SourceContainerRefreshService.
+Source Container Refresh Service Test
 
-Validates:
+Purpose:
+    Provides isolated success-path and failure-path validation of
+    SourceContainerRefreshService.
 
-- Source Refresh reservation
-- complete enumeration
-- observation validation
-- catalog retrieval
-- reconciliation
-- atomic persistence request
-- Processing Job completion
-- reconciliation results
-- operational measurements
-- Processing Job failure handling
+Verifies:
+    - Refresh reserves the Source before enumeration.
+    - Complete observations are validated.
+    - Observed and persisted containers are reconciled.
+    - Reconciliation results are submitted for atomic persistence.
+    - Successful Refresh completes its Processing Job.
+    - Refresh measurements are produced correctly.
+    - Failures cause the Processing Job to fail.
+    - Failure paths do not report successful Refresh completion.
+
+Does NOT:
+    - Connect to a live Source of Truth.
+    - Connect to the live AlphaOmega database.
+    - Synchronize content.
+    - Create Knowledge Objects.
 """
 
 from scripts.sync.source_container_refresh_service import (

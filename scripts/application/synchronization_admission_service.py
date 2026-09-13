@@ -1,31 +1,26 @@
 """
-File:
-    synchronization_admission_service.py
+AlphaOmega Synchronization Admission Service
 
 Purpose:
-    Validate one AlphaOmega SynchronizationRequest against the
-    persisted Source and Source Container catalogs.
+    Validates one SynchronizationRequest against the persisted Source and
+    Source Container catalogs.
 
-The SynchronizationAdmissionService owns:
-    - Validating that the requested Source exists.
-    - Validating that the requested Source is enabled.
-    - Validating that the requested Source Container exists.
-    - Validating that the Source Container is active.
-    - Validating that the Source Container belongs to the
-      requested Source.
+Responsibilities:
+    - Validate that the requested Source exists.
+    - Validate that the requested Source is enabled.
+    - Validate that the requested Source Container exists.
+    - Validate that the Source Container is active.
+    - Validate that the Source Container belongs to the requested Source.
+    - Return the persisted identities required by later synchronization
+      capabilities.
 
-The SynchronizationAdmissionService does NOT:
+Does NOT:
     - Communicate with a Source of Truth.
     - Refresh Source Containers.
     - Detect synchronization overlap.
     - Reserve synchronization execution.
-    - Create Processing Jobs.
-    - Create Synchronization Runs.
-    - Invoke the SynchronizationOrchestrator.
-    - Execute synchronization.
-
-Those responsibilities belong to later production application
-capabilities.
+    - Create Processing Jobs or Synchronization Runs.
+    - Invoke SynchronizationOrchestrator.
 """
 
 

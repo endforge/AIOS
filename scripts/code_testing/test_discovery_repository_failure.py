@@ -1,12 +1,20 @@
 """
-File: test_discovery_repository_failure.py
+Discovery Repository Failure Test
 
 Purpose:
     Verifies Discovery behavior when repository infrastructure fails.
 
-Test:
-    An unexpected KnowledgeObjectRepository failure must be converted
-    to a stage-level DiscoveryError and terminate Discovery.
+Verifies:
+    - An unexpected Knowledge Object repository failure terminates Discovery.
+    - The repository failure is converted to a stage-level DiscoveryError.
+    - DiscoveryError preserves the original repository exception as its cause.
+    - The preserved cause remains the controlled underlying failure.
+
+Does NOT:
+    - Test record-level Discovery failure recovery.
+    - Modify the live Knowledge Object repository.
+    - Perform Extraction or Load.
+    - Test Connector or Translator behavior.
 """
 
 from datetime import datetime, timezone

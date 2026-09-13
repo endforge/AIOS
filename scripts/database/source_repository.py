@@ -1,10 +1,22 @@
 """
-File:
-    source_repository.py
+AlphaOmega Source Repository
 
 Purpose:
-    Provides database access to AlphaOmega Source records required
-    by synchronization and application services.
+    Provides database access to AlphaOmega Source records required by
+    synchronization and application services.
+
+Responsibilities:
+    - Find a Source by AlphaOmega identity.
+    - Resolve a Source identity by registered Source name.
+    - Retrieve enabled Sources.
+    - Own ordinary database access to the sources table.
+
+Does NOT:
+    - Register or modify Sources.
+    - Connect to a Source of Truth.
+    - Enumerate Source Containers.
+    - Decide synchronization scope.
+    - Execute synchronization.
 """
 
 from typing import Optional

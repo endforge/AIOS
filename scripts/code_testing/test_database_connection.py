@@ -1,14 +1,21 @@
 """
-Authenticated Database Connection Test
+Database Connection Test
 
-Verifies that AlphaOmega can:
+Purpose:
+    Validates AlphaOmega database connectivity using the production database
+    connection and credential boundaries.
 
-1. Retrieve its service identity credential through the Credential Provider.
-2. Authenticate with Supabase.
-3. Establish an authenticated database client.
-4. SELECT from knowledge_objects through the configured RLS policy.
+Verifies:
+    - Required database credentials can be retrieved.
+    - DatabaseConnection can establish a usable database client.
+    - The client can perform a read operation against knowledge_objects.
+    - Database connectivity works through the intended production boundary.
 
-No credentials or authentication tokens are displayed.
+Does NOT:
+    - Modify Knowledge Objects.
+    - Test synchronization behavior.
+    - Test repository business operations.
+    - Modify database configuration or credentials.
 """
 
 from common.security.local_credential_provider import (

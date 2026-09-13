@@ -1,9 +1,23 @@
 """
-File: discovery_record.py
+AlphaOmega Discovery Record
 
 Purpose:
-    Represents the synchronization decision produced by Discovery
-    for one translated source object.
+    Represents the synchronization decision produced by Discovery for one
+    translated source object.
+
+Responsibilities:
+    - Preserve orchestration correlation identity.
+    - Store resolved Knowledge Object identity when one exists.
+    - Store the Discovery synchronization state.
+    - Store the factual reason for the comparison result.
+    - Preserve the previous content hash when applicable.
+    - Indicate whether downstream Extraction is required.
+
+Does NOT:
+    - Copy or reinterpret Translator-owned source facts.
+    - Retrieve source content.
+    - Perform Extraction or Load.
+    - Persist Knowledge Objects.
 """
 
 

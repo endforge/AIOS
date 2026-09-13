@@ -1,15 +1,25 @@
 """
-File: test_graph_content_retrievers.py
+Microsoft Graph Content Retriever Test
 
 Purpose:
-    Verify Microsoft Graph content retrievers without making
-    live Microsoft Graph requests.
+    Validates OneDrive and OneNote content retrievers without making live
+    Microsoft Graph requests.
 
-The retrievers operate downstream of Translator.
+Verifies:
+    - OneDrive content can be retrieved for a valid source object ID.
+    - Missing OneDrive source object identity is rejected.
+    - OneNote CONTENT can be retrieved for a valid source object ID.
+    - Missing OneNote source object identity is rejected.
+    - Missing OneNote canonical object type is rejected.
+    - OneNote CONTAINER objects are rejected from content retrieval.
+    - Retriever behavior uses AlphaOmega canonical object types downstream
+      of Translator.
 
-Where object type is required, tests therefore use AlphaOmega's
-canonical object types rather than Microsoft Graph source-native
-object types.
+Does NOT:
+    - Make live Microsoft Graph requests.
+    - Enumerate OneDrive or OneNote.
+    - Perform Extraction or Load.
+    - Persist Knowledge Objects.
 """
 
 from unittest.mock import Mock, patch

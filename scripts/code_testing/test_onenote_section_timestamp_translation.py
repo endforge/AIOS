@@ -1,19 +1,22 @@
 """
-File: test_onenote_section_timestamp_translation.py
+OneNote Section Timestamp Translation Test
 
 Purpose:
-    Verify that the real GraphTranslator uses the parent OneNote
-    Section modification timestamp as the canonical
-    TranslatorRecord.source_modified_at value for a OneNote Page.
+    Validates that GraphTranslator uses the parent OneNote Section
+    modification timestamp as the canonical source_modified_at value for a
+    OneNote page.
 
-This is an isolated test.
+Verifies:
+    - A controlled ConnectorSection can be translated.
+    - TranslationInput provides correlation identity.
+    - GraphTranslator produces a page TranslatorRecord.
+    - The page source_modified_at matches the parent Section modification
+      timestamp.
 
-It does NOT:
-    - Call Microsoft Graph.
-    - Run Discovery.
-    - Run Extraction.
-    - Run Load.
-    - Create a Processing Job.
+Does NOT:
+    - Make live synchronization decisions.
+    - Perform Discovery.
+    - Perform Extraction or Load.
     - Write to AlphaOmega.
 """
 

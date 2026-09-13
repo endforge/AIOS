@@ -1,15 +1,19 @@
 """
-File: find_onedrive_file_id.py
+Find OneDrive File ID
 
 Purpose:
-    Locate a specific OneDrive file by its known OneDrive-relative
-    path and print its current Microsoft Graph driveItem ID.
+    Locates a specific OneDrive file by its known OneDrive-relative path
+    and prints its current Microsoft Graph driveItem ID.
 
-This script:
-    - Reads OneDrive only.
-    - Does not enumerate OneDrive.
-    - Does not modify the source file.
-    - Does not write to the AlphaOmega database.
+Verifies:
+    - The configured OneDrive file can be resolved by its known path.
+    - Microsoft Graph returns the current driveItem identity for that file.
+
+Does NOT:
+    - Enumerate the complete OneDrive.
+    - Modify the source file.
+    - Write to the AlphaOmega database.
+    - Execute synchronization.
 """
 
 from urllib.parse import quote

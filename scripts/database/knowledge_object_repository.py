@@ -1,10 +1,21 @@
 """
 AlphaOmega Knowledge Object Repository
 
-Provides database access to canonical Knowledge Objects.
+Purpose:
+    Provides database access to canonical AlphaOmega Knowledge Objects.
 
-The repository owns storage-specific operations against the
-knowledge_objects table. It does not make synchronization decisions.
+Responsibilities:
+    - Find Knowledge Objects by source identity.
+    - Create new Knowledge Objects.
+    - Update existing Knowledge Objects.
+    - Validate persistence inputs and expected database results.
+    - Own storage-specific operations against the knowledge_objects table.
+
+Does NOT:
+    - Determine synchronization state.
+    - Decide whether a Knowledge Object should be created or updated.
+    - Extract or transform source content.
+    - Execute synchronization stages.
 """
 
 from typing import Any, Mapping, Optional

@@ -1,12 +1,24 @@
 """
-File: text_extractor.py
+AlphaOmega Text Extractor
 
 Purpose:
-    Produces canonical text content from supported source objects.
+    Produces canonical text content from supported source formats.
 
-This module contains format-specific text extraction behavior.
-It does not retrieve source objects, determine synchronization state,
-persist Knowledge Objects, or perform AI processing.
+Responsibilities:
+    - Determine whether a file format is supported for text extraction.
+    - Extract canonical text from plain-text files.
+    - Extract canonical text from HTML.
+    - Extract canonical text from DOCX documents.
+    - Extract canonical text from PDF documents.
+    - Extract canonical text from XLSX workbooks.
+    - Reject unsupported extraction formats.
+
+Does NOT:
+    - Retrieve source objects.
+    - Determine synchronization state.
+    - Generate content hashes.
+    - Persist Knowledge Objects.
+    - Perform AI interpretation or enrichment.
 """
 
 import io

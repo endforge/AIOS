@@ -1,8 +1,20 @@
 """
-File: base_translator.py
+AlphaOmega Base Translator
 
 Purpose:
-    Defines the contract all translators must follow.
+    Defines the common interface that AlphaOmega Translator implementations
+    must follow.
+
+Responsibilities:
+    - Define the shared Translator contract.
+    - Require Translator implementations to process TranslationInput.
+    - Establish TranslatorSection as the completed output of Translation.
+
+Does NOT:
+    - Implement source-specific translation.
+    - Retrieve source objects.
+    - Generate orchestration correlation identity.
+    - Perform Discovery, Extraction, or Load.
 """
 
 

@@ -1,19 +1,27 @@
-"""
-File: test_extraction_service.py
+""""
+Extraction Service Test
 
 Purpose:
-    Verify ExtractionService behavior without making live
-    source-system requests.
+    Validates ExtractionService behavior without making live source-system
+    requests.
 
-Tests:
-    - OneDrive extraction flow.
-    - OneNote extraction flow.
-    - Successful correlation identity propagation.
-    - Record-level failure isolation.
-    - Failed-record correlation identity preservation.
-    - Invalid record input handling.
-    - Stage-level failure handling.
-    - ExtractionSection locking.
+Verifies:
+    - OneDrive extraction retrieves, extracts, hashes, and returns canonical
+      content.
+    - OneNote extraction routes HTML through the appropriate extraction path.
+    - Successful records preserve orchestration correlation identity.
+    - Record-level failures remain isolated from other records in the batch.
+    - Failed records preserve their correlation identity.
+    - Missing required record input is handled correctly.
+    - Missing or invalid batch input produces a stage-level failure.
+    - Unexpected stage failures are converted to ExtractionError.
+    - ExtractionSection is locked after successful stage completion.
+
+Does NOT:
+    - Make live source-system requests.
+    - Perform Discovery.
+    - Perform Load.
+    - Persist Knowledge Objects.
 """
 
 from types import SimpleNamespace

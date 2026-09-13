@@ -1,3 +1,24 @@
+"""
+Live OneDrive Container Reconciliation Test
+
+Purpose:
+    Validates Source Container reconciliation using a complete live OneDrive
+    observation and the persisted AlphaOmega Source Container catalog.
+
+Verifies:
+    - Complete OneDrive container observation succeeds.
+    - The observation passes validation.
+    - Persisted OneDrive Source Containers can be retrieved.
+    - Reconciliation classifies observed and persisted containers correctly.
+    - Reconciliation can identify catalog changes without applying them.
+
+Does NOT:
+    - Apply reconciliation results.
+    - Modify the Source Container Catalog.
+    - Modify OneDrive.
+    - Synchronize file content.
+"""
+
 from common.security.local_credential_provider import (
     LocalCredentialProvider,
 )

@@ -1,3 +1,23 @@
+"""
+OneDrive Container Observation Test
+
+Purpose:
+    Validates complete live OneDrive Source Container observation.
+
+Verifies:
+    - OneDriveContainerEnumerator produces a complete observation.
+    - Observed OneDrive containers satisfy Source Container validation rules.
+    - Container identity and hierarchy information are suitable for later
+      reconciliation.
+
+Does NOT:
+    - Persist Source Containers.
+    - Reconcile against the existing catalog.
+    - Modify OneDrive.
+    - Synchronize file content.
+"""
+
+
 from scripts.connectors.ms_graph.onedrive_container_enumerator import (
     OneDriveContainerEnumerator,
 )

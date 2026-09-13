@@ -1,56 +1,22 @@
 """
-File: test_live_discovery_unchanged.py
+Live Discovery UNCHANGED Test
 
 Purpose:
-    Perform the targeted live AlphaOmega Discovery UNCHANGED test.
+    Validates the Discovery UNCHANGED path against live persisted AlphaOmega
+    data.
 
-Targets:
-    OneDrive:
-        Bogmire Introduction Draft v1.docx
+Verifies:
+    - A live translated source object can be compared with its existing
+      Knowledge Object.
+    - Discovery classifies matching source and persisted facts as UNCHANGED.
+    - Existing Knowledge Object identity is preserved.
+    - UNCHANGED records do not require Extraction.
 
-    OneNote:
-        Blacksmith Lingo
-
-This test:
-    - Targets exactly two known Knowledge Objects already persisted
-      by the successful targeted live Load integration test.
-    - Uses the real authenticated AlphaOmega database connection.
-    - Uses the real SourceRepository.
-    - Uses the real KnowledgeObjectRepository.
-    - Uses the real DiscoveryService.
-    - Builds controlled Translator records matching the trusted
-      source facts persisted during the targeted NEW Load test.
-    - Verifies Discovery classifies both records as UNCHANGED.
-    - Verifies requires_extraction is False.
-    - Verifies the existing Knowledge Object identity is preserved.
-    - Verifies the previous content hash is preserved.
-    - Verifies correlation identity is preserved.
-    - Verifies Discovery produces no record-level errors.
-    - Verifies the DiscoverySection is locked.
-    - Performs no Extraction.
-    - Performs no Load.
-    - Performs no INSERT, UPDATE, or DELETE operations.
-
-IMPORTANT:
-    This test is intentionally read-only.
-
-    The two target Knowledge Objects must already exist in AlphaOmega.
-
-    The original targeted live Load test persisted these records using
-    controlled Translator records with:
-
-        source_parent_object_id = None
-        source_modified_at = None
-
-    This test therefore reproduces those same trusted Translator facts
-    in order to validate the real Discovery UNCHANGED path against the
-    current persisted repository state.
-
-    This test does NOT claim to validate:
-        Connector -> Translator -> Discovery
-
-    Full live source metadata comparison will be validated later through
-    the completed orchestration path.
+Does NOT:
+    - Perform Extraction.
+    - Perform Load.
+    - Modify Knowledge Objects.
+    - Modify source data.
 """
 
 from types import SimpleNamespace

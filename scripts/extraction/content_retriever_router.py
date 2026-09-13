@@ -1,12 +1,17 @@
 """
-File: content_retriever_router.py
+AlphaOmega Content Retriever Router
 
 Purpose:
-    Selects the appropriate source-specific content retriever
-    for the Extraction stage.
+    Selects the appropriate source-specific content retriever for Extraction.
 
-This module does NOT:
-    - Retrieve source content itself.
+Responsibilities:
+    - Route supported OneDrive content requests to the OneDrive retriever.
+    - Route supported OneNote content requests to the OneNote retriever.
+    - Reject unsupported Source or object combinations.
+    - Keep source-specific retrieval selection outside ExtractionService.
+
+Does NOT:
+    - Retrieve content itself.
     - Enumerate Sources of Truth.
     - Extract canonical content.
     - Determine synchronization state.

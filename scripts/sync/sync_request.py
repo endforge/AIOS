@@ -1,32 +1,26 @@
 """
-File:
-    synchronization_request.py
+AlphaOmega Synchronization Request
 
 Purpose:
-    Represents one production synchronization request submitted to
-    the AlphaOmega application layer.
+    Represents one production synchronization request submitted to the
+    AlphaOmega application layer.
 
-A SynchronizationRequest identifies:
-    - The registered AlphaOmega Source.
-    - The registered AlphaOmega Source Container selected for
+Responsibilities:
+    - Identify the registered AlphaOmega Source requested for synchronization.
+    - Identify the registered AlphaOmega Source Container selected for
       synchronization.
+    - Require non-empty source_id and source_container_id values.
+    - Preserve source_id plus source_container_id as the production
+      synchronization request identity.
 
-The request does NOT:
-    - Validate that the Source exists.
-    - Validate that the Source Container exists.
+Does NOT:
+    - Validate that the Source or Source Container exists.
     - Validate that the Source Container belongs to the Source.
     - Determine whether the Source Container is active.
     - Check the Source of Truth.
     - Detect synchronization conflicts.
-    - Create Processing Jobs.
-    - Create Synchronization Runs.
+    - Create Processing Jobs or Synchronization Runs.
     - Execute synchronization.
-
-Those responsibilities belong to the application capability that
-processes the request.
-
-Production synchronization request identity is:
-    source_id + source_container_id
 """
 
 

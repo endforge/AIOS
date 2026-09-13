@@ -1,8 +1,22 @@
 """
 AlphaOmega Credential Provider Interface
 
-Defines the stable interface used by AlphaOmega infrastructure to retrieve
-credentials without depending on a specific credential-storage technology.
+Purpose:
+    Defines the stable interface used by AlphaOmega infrastructure to
+    retrieve credentials without depending on a specific credential-storage
+    technology.
+
+Responsibilities:
+    - Define the common CredentialProvider interface.
+    - Require credential providers to retrieve secrets by logical
+      AlphaOmega credential name.
+    - Preserve a storage-independent credential retrieval boundary.
+
+Does NOT:
+    - Store credentials.
+    - Select a credential-storage technology.
+    - Implement credential retrieval from a specific provider.
+    - Expose provider-specific retrieval behavior to consumers.
 """
 
 from abc import ABC, abstractmethod

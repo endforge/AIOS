@@ -1,25 +1,22 @@
 """
-File: processing_job_repository.py
+AlphaOmega Processing Job Repository
 
 Purpose:
-    Provides database persistence operations for AlphaOmega
-    Processing Jobs.
+    Provides database persistence operations for AlphaOmega Processing Jobs.
 
-ProcessingJobRepository owns:
-    - Creating Processing Job records.
-    - Marking Processing Jobs completed.
-    - Marking Processing Jobs failed.
+Responsibilities:
+    - Create Processing Job records.
+    - Mark Processing Jobs completed.
+    - Mark Processing Jobs failed.
+    - Validate Processing Job identity and expected update results.
+    - Own storage-specific lifecycle updates against the processing_jobs table.
 
-ProcessingJobRepository does NOT:
+Does NOT:
     - Decide when a Processing Job should be created.
     - Coordinate synchronization stages.
     - Determine synchronization success or failure.
     - Execute Connector, Translator, Discovery, Extraction, or Load.
     - Generate synchronization correlation identity.
-
-Synchronization Orchestration owns the Processing Job lifecycle.
-This repository only persists lifecycle state requested by the
-Orchestrator.
 """
 
 from datetime import datetime, timezone

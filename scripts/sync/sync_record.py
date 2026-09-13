@@ -1,8 +1,22 @@
 """
-File: sync_record.py
+AlphaOmega Synchronization Record
 
 Purpose:
     Contains the completed sections for a single synchronization run.
+
+Responsibilities:
+    - Store completed synchronization sections.
+    - Attach completed sections by section name.
+    - Prevent duplicate section names from being attached.
+    - Retrieve previously attached sections.
+    - Report whether a section has been attached.
+    - Return all attached sections.
+
+Does NOT:
+    - Populate stage-owned sections.
+    - Determine when a section is complete.
+    - Modify the contents of attached sections.
+    - Execute synchronization stages.
 """
 
 from scripts.sync.sync_base_section import BaseSection

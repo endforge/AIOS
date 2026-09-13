@@ -1,12 +1,19 @@
 """
-File: content_hasher.py
+AlphaOmega Content Hasher
 
 Purpose:
-    Generates deterministic SHA-256 hashes for canonical content.
+    Produces deterministic hashes for canonical extracted content.
 
-The content hash represents the canonical content produced by
-Extraction. Hashing occurs after format-specific extraction has
-produced the canonical representation.
+Responsibilities:
+    - Accept canonical content for hashing.
+    - Produce the canonical SHA-256 content hash used by synchronization.
+    - Provide deterministic hash results for equivalent canonical content.
+
+Does NOT:
+    - Retrieve source content.
+    - Extract canonical text.
+    - Determine synchronization state.
+    - Persist Knowledge Objects.
 """
 
 import hashlib

@@ -1,16 +1,21 @@
 """
-File: test_extraction_record_validation.py
+Extraction Record Validation Test
 
 Purpose:
-    Verify the required ExtractionRecord output contract.
+    Validates required-field and value validation performed by
+    ExtractionRecord.
 
-Tests:
-    - Valid ExtractionRecord accepted.
-    - Missing canonical content rejected.
-    - Empty canonical content rejected.
-    - Missing content hash rejected.
-    - Incorrect SHA-256 length rejected.
-    - Non-hexadecimal SHA-256 rejected.
+Verifies:
+    - Valid ExtractionRecord data passes validation.
+    - Missing or invalid required Extraction fields are rejected.
+    - Canonical content and extraction metadata must satisfy the record
+      contract before downstream processing.
+
+Does NOT:
+    - Retrieve source content.
+    - Execute ExtractionService.
+    - Perform Load.
+    - Persist Knowledge Objects.
 """
 
 from scripts.extraction.extraction_record import (

@@ -1,3 +1,23 @@
+"""
+Synchronization Base Section Test
+
+Purpose:
+    Validates the common synchronization section locking contract.
+
+Verifies:
+    - A section begins unlocked.
+    - Stage-owned values can be populated before locking.
+    - Locking marks the section complete and immutable.
+    - Supported mutable values are frozen when the section is locked.
+    - Attempts to modify locked section state are rejected.
+
+Does NOT:
+    - Test a specific synchronization stage.
+    - Execute synchronization.
+    - Persist synchronization data.
+    - Unlock completed sections.
+"""
+
 from scripts.sync.sync_base_section import BaseSection
 from scripts.sync.sync_exceptions import SectionLockedError
 

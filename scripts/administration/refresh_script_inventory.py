@@ -1043,6 +1043,7 @@ def analyze_python(
                 referenced_scripts
             ),
 
+    
         "referenced_tables":
             sorted(
                 referenced_tables
@@ -1389,9 +1390,6 @@ def build_base_record(
             [],
 
         "referenced_scripts":
-            [],
-
-        "sql_functions":
             [],
 
         "referenced_tables":

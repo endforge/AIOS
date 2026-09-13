@@ -1,8 +1,21 @@
 """
-Read-only live reconciliation test for the persisted
-OneDrive AlphaOmega Source Container subtree.
+Live AlphaOmega Container Reconciliation Test
 
-No database writes are performed.
+Purpose:
+    Validates Source Container reconciliation against the live persisted
+    AlphaOmega OneDrive container catalog.
+
+Verifies:
+    - Live OneDrive container observations can be enumerated and validated.
+    - Persisted Source Containers can be retrieved for comparison.
+    - Reconciliation correctly compares observed and persisted containers.
+    - Reconciliation produces the expected catalog change classifications.
+
+Does NOT:
+    - Apply reconciliation results to the database.
+    - Modify the Source Container Catalog.
+    - Perform content synchronization.
+    - Create Knowledge Objects.
 """
 
 from common.security.local_credential_provider import (

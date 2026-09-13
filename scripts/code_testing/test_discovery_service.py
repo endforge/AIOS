@@ -1,27 +1,28 @@
 """
-File: test_discovery_service.py
+Discovery Service Integration Test
 
 Purpose:
-    Comprehensive integration test for the AlphaOmega Discovery stage.
+    Provides comprehensive integration validation of the AlphaOmega
+    Discovery stage against the live AlphaOmega repository.
 
-Tests Discovery against the live AlphaOmega repository using
-controlled TranslatorRecords and Synthetic Data Knowledge Objects.
+Verifies:
+    - NEW objects are classified correctly.
+    - Existing unchanged objects are classified UNCHANGED.
+    - Changes to name, parent, or source modification timestamp are
+      classified MODIFIED.
+    - Combined comparison-field changes are classified MODIFIED.
+    - Non-comparison fields do not incorrectly cause MODIFIED.
+    - Nullable parent and timestamp comparisons behave correctly.
+    - Existing Knowledge Object identity is preserved where required.
+    - Extraction routing is set correctly from Discovery results.
+    - DiscoverySection completes and locks correctly.
+    - Correlation identity propagates through Discovery.
 
-Tests:
-    1. NEW classification
-    2. UNCHANGED classification
-    3. MODIFIED - name changed
-    4. MODIFIED - parent changed
-    5. MODIFIED - source modified timestamp changed
-    6. MODIFIED - all comparison fields changed
-    7. Non-comparison fields do not cause MODIFIED
-    8. Nullable parent and timestamp - both remain NULL
-    9. Nullable parent - NULL to value
-    10. Nullable timestamp - NULL to value
-    11. Nullable parent and timestamp - both changed
-    12. DiscoverySection completion
-    13. DiscoverySection locking
-    14. Correlation identity propagation
+Does NOT:
+    - Retrieve source content.
+    - Perform Extraction or Load.
+    - Modify source data.
+    - Test Connector or Translator source retrieval behavior.
 """
 
 from datetime import datetime, timezone

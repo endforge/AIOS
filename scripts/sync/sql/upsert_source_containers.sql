@@ -1,3 +1,23 @@
+-- Upsert Source Containers
+--
+-- Purpose:
+--     Persists observed Source Containers into the AlphaOmega Source
+--     Container Catalog.
+--
+-- Responsibilities:
+--     - Insert newly observed Source Containers.
+--     - Update existing Source Containers from current observations.
+--     - Preserve AlphaOmega identity for existing catalog records.
+--     - Record current observation and Processing Job attribution.
+--     - Reactivate previously inactive containers when observed again.
+--
+-- Does NOT:
+--     - Enumerate a Source of Truth.
+--     - Determine which containers are absent.
+--     - Perform Source Container reconciliation.
+--     - Synchronize content.
+--     - Create Knowledge Objects.
+
 CREATE OR REPLACE FUNCTION public.upsert_source_containers(
     p_source_id uuid,
     p_processing_job_id uuid,

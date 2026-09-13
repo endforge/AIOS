@@ -1,18 +1,25 @@
 """
-File: test_text_extractor_formats.py
+Text Extractor Format Test
 
 Purpose:
-    Verify TextExtractor behavior for each currently supported
-    extraction format without accessing Microsoft Graph or any
-    external Source of Truth.
+    Validates TextExtractor behavior for every currently supported extraction
+    format without accessing an external Source of Truth.
 
-Tests:
-    - Plain text extraction.
-    - DOCX extraction.
-    - PDF extraction.
-    - XLSX extraction.
-    - HTML extraction.
-    - Unsupported format rejection.
+Verifies:
+    - Plain text extraction produces canonical text.
+    - HTML extraction produces canonical text.
+    - DOCX extraction produces canonical text.
+    - PDF extraction produces canonical text.
+    - XLSX extraction produces canonical text.
+    - Unsupported formats are rejected.
+    - Controlled in-memory test documents can exercise format-specific
+      extraction behavior.
+
+Does NOT:
+    - Access Microsoft Graph.
+    - Retrieve live source objects.
+    - Perform Discovery or Load.
+    - Persist Knowledge Objects.
 """
 
 import io

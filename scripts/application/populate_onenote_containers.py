@@ -1,22 +1,23 @@
 """
-Controlled initial population of the complete OneNote
-Source Container catalog.
+Complete OneNote Source Container Population
 
-This Lab 8 bootstrap operation measures:
+Purpose:
+    Performs the controlled initial population of the persisted OneNote
+    Source Container Catalog.
 
-- Microsoft Graph enumeration time.
-- Observation validation time.
-- JSON persistence payload size.
-- PostgreSQL persistence time.
-- Database verification time.
-- Total execution time.
+Responsibilities:
+    - Enumerate the complete OneNote container hierarchy.
+    - Validate the complete Source Container observation.
+    - Create a Processing Job for the controlled population.
+    - Persist observed OneNote Source Containers through the approved
+      database operation.
+    - Report population measurements and results.
 
-The operation does not:
-
-- Synchronize OneNote pages.
-- Create Knowledge Objects.
-- Perform Source Container Refresh reconciliation.
-- Mark Source Containers inactive.
+Does NOT:
+    - Perform ongoing Source Container Refresh.
+    - Synchronize OneNote page content.
+    - Create Knowledge Objects.
+    - Replace the shared SourceContainerRefreshService.
 """
 
 import json

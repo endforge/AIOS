@@ -1,8 +1,21 @@
 """
-Manual tests for the Microsoft Graph Connector stage.
+Microsoft Graph Connector Test
 
-These tests verify complete Connector enumeration without involving
-Translator, Discovery, Extraction, or Load.
+Purpose:
+    Validates complete Connector enumeration for the supported Microsoft
+    Graph Sources of Truth.
+
+Verifies:
+    - OneDrive can be completely enumerated through GraphConnector.
+    - OneNote can be completely enumerated through GraphConnector.
+    - Connector results can be summarized by canonical object type.
+    - Connector processing completes without involving downstream stages.
+
+Does NOT:
+    - Perform Translation.
+    - Perform Discovery, Extraction, or Load.
+    - Modify Microsoft Graph source data.
+    - Write to the AlphaOmega database.
 """
 
 from collections import Counter

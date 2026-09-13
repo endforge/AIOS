@@ -1,9 +1,21 @@
 """
-File:
-    source_container_repository.py
+AlphaOmega Source Container Repository
 
 Purpose:
     Provides database access to persisted AlphaOmega Source Containers.
+
+Responsibilities:
+    - Find a Source Container by AlphaOmega identity.
+    - Find a Source Container by Source and source-native identity.
+    - Retrieve Source Containers belonging to a Source.
+    - Retrieve active Source Containers belonging to a Source.
+    - Own ordinary database access to the source_containers table.
+
+Does NOT:
+    - Enumerate Sources of Truth.
+    - Perform Source Container Refresh reconciliation.
+    - Decide synchronization scope.
+    - Build application presentation structures.
 """
 
 

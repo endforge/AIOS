@@ -1,3 +1,24 @@
+"""
+Source Container Reconciler Test
+
+Purpose:
+    Validates SourceContainerReconciler behavior using controlled observed and
+    persisted Source Container sets.
+
+Verifies:
+    - Newly observed containers are classified correctly.
+    - Existing containers are classified correctly.
+    - Reappearing containers are identified correctly.
+    - Persisted containers absent from a complete observation are identified.
+    - Reconciliation results preserve the identities needed for persistence.
+
+Does NOT:
+    - Enumerate a Source of Truth.
+    - Persist reconciliation results.
+    - Deactivate Source Containers itself.
+    - Synchronize content.
+"""
+
 from scripts.sync.source_container_reconciler import (
     SourceContainerReconciler,
 )

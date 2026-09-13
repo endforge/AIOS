@@ -1,32 +1,33 @@
 """
-File: test_graph_translator_onenote.py
+Full OneNote Connector and Translator Integration Test
 
 Purpose:
-    Full Microsoft Graph OneNote Connector -> Translator integration test.
+    Validates the complete Microsoft Graph OneNote Connector to Translator
+    integration against the entire OneNote Source of Truth.
 
-This test enumerates the ENTIRE OneNote Source of Truth.
-
-It validates:
-    - Connector completed successfully.
+Verifies:
+    - Connector processing completes successfully.
     - Connector enumeration is complete.
-    - Translator completed successfully.
+    - Translator processing completes successfully.
     - Every Connector object is accounted for.
     - Notebooks become CONTAINER.
     - Section groups become CONTAINER.
     - Sections become CONTAINER.
     - Pages become CONTENT.
     - Names match Microsoft Graph.
-    - Blank OneNote page titles become "Untitled".
+    - Blank OneNote page titles become Untitled.
     - Source object IDs match Microsoft Graph.
-    - Connector-proven parent relationships survive translation.
-    - Connector-proven source paths survive translation.
+    - Connector-proven parent relationships survive Translation.
+    - Connector-proven source paths survive Translation.
     - Created and modified timestamps match Microsoft Graph.
-    - Connector hierarchy is marked verified.
+    - Connector hierarchy remains marked as verified.
     - Translator record errors are reported.
 
-Unlike the deterministic sample test, this test does not print every
-record. It validates the complete source and reports only summaries
-and failures.
+Does NOT:
+    - Perform Discovery.
+    - Perform Extraction or Load.
+    - Persist Knowledge Objects.
+    - Modify OneNote source data.
 """
 
 from collections import Counter

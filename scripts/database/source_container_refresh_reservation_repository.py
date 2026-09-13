@@ -1,18 +1,23 @@
 """
 AlphaOmega Source Container Refresh Reservation Repository
 
-Owns the database operation that atomically:
+Purpose:
+    Provides the database boundary for atomically reserving one complete
+    Source Container Refresh operation.
 
-- Checks for an active operation against the Source.
-- Reserves the complete Source for Refresh.
-- Creates the running Processing Job.
+Responsibilities:
+    - Check for an active operation against the Source through the
+      database reservation operation.
+    - Reserve the complete Source for Refresh.
+    - Create the running Processing Job as part of the same atomic operation.
+    - Return the Processing Job identity created by the reservation.
+    - Invoke the reserve_source_container_refresh database RPC.
 
-This repository does not:
-
-- Enumerate Source Containers.
-- Reconcile the Source Container Catalog.
-- Apply catalog changes.
-- Complete or fail Processing Jobs.
+Does NOT:
+    - Enumerate Source Containers.
+    - Reconcile the Source Container Catalog.
+    - Apply catalog changes.
+    - Complete or fail Processing Jobs.
 """
 
 

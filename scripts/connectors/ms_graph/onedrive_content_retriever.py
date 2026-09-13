@@ -1,11 +1,16 @@
 """
-File: onedrive_content_retriever.py
+OneDrive Content Retriever
 
 Purpose:
     Retrieves the raw content of one identified OneDrive source object
     for downstream Extraction.
 
-This module does NOT:
+Responsibilities:
+    - Retrieve one identified OneDrive file by its source object ID.
+    - Use Microsoft Graph to retrieve the file's raw binary content.
+    - Return the retrieved content for downstream Extraction.
+
+Does NOT:
     - Enumerate OneDrive.
     - Determine synchronization state.
     - Extract canonical content.

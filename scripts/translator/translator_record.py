@@ -1,14 +1,25 @@
 """
-File: translator_record.py
+AlphaOmega Translator Record
 
 Purpose:
-    Represents one canonical synchronization object produced by the
-    Translator stage.
+    Represents the canonical source facts produced by Translation for one
+    source object.
 
-The Translator converts repository-specific objects into AlphaOmega's
-canonical synchronization model. Each TranslatorRecord represents one
-translated synchronization object that may later be evaluated by the
-Discovery stage.
+Responsibilities:
+    - Preserve orchestration correlation identity.
+    - Store canonical Source of Truth identity.
+    - Store source-native object and parent identities.
+    - Store canonical object type.
+    - Store normalized name and hierarchy path.
+    - Store source-created and source-modified timestamps.
+    - Store Translator-owned factual source metadata.
+
+Does NOT:
+    - Generate correlation identity.
+    - Determine synchronization state.
+    - Retrieve source content.
+    - Store Discovery or Extraction decisions.
+    - Persist Knowledge Objects.
 """
 
 

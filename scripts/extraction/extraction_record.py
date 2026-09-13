@@ -1,9 +1,24 @@
 """
-File: extraction_record.py
+AlphaOmega Extraction Record
 
 Purpose:
-    Represents the canonical knowledge produced by Extraction
-    for one source object requiring extraction.
+    Represents the canonical knowledge produced by Extraction for one source
+    object requiring extraction.
+
+Responsibilities:
+    - Preserve orchestration correlation identity.
+    - Store canonical extracted content.
+    - Store the canonical content hash.
+    - Store Extraction-owned canonical metadata.
+    - Store extractor identity and extraction timestamp.
+    - Validate required Extraction output.
+
+Does NOT:
+    - Generate or interpret correlation identity.
+    - Copy or reinterpret Translator or Discovery fields.
+    - Retrieve source content.
+    - Determine synchronization state.
+    - Persist Knowledge Objects.
 """
 
 

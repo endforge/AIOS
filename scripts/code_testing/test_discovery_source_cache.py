@@ -1,13 +1,21 @@
 """
-File: test_discovery_source_cache.py
+Discovery Source Cache Test
 
 Purpose:
-    Verifies that Discovery resolves each Source of Truth only once
-    during a Discovery run.
+    Verifies that Discovery resolves each Source of Truth only once during
+    a Discovery run.
 
-Test:
-    Multiple OneNote TranslatorRecords should result in exactly one
-    SourceRepository lookup for "OneNote".
+Verifies:
+    - Multiple records from the same Source of Truth are processed normally.
+    - Five OneNote TranslatorRecords produce five Discovery records.
+    - SourceRepository lookup for OneNote occurs exactly once during the run.
+    - Discovery reuses the resolved Source identity for subsequent records.
+
+Does NOT:
+    - Test caching across separate Discovery runs.
+    - Modify Source records.
+    - Perform Extraction or Load.
+    - Test Connector source enumeration.
 """
 
 from datetime import datetime, timezone

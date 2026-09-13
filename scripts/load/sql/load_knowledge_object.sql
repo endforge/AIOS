@@ -1,3 +1,22 @@
+-- Load Knowledge Object
+--
+-- Purpose:
+--     Provides the database operation used by Load to persist a Knowledge
+--     Object and its synchronization history within the required database
+--     transaction boundary.
+--
+-- Responsibilities:
+--     - Persist the Knowledge Object changes supplied by Load.
+--     - Persist the associated synchronization history event.
+--     - Keep related Load persistence within the approved database
+--       transaction boundary.
+--
+-- Does NOT:
+--     - Determine synchronization state.
+--     - Retrieve or extract source content.
+--     - Decide whether a record is eligible for Load.
+--     - Execute synchronization orchestration.
+
 create or replace function load_knowledge_object(
     p_sync_state text,
     p_knowledge_object_id uuid,

@@ -1,31 +1,28 @@
 """
-File: extraction_service.py
+AlphaOmega Extraction Service
 
 Purpose:
-    Coordinates the Extraction stage for source objects that have
-    already been determined by synchronization orchestration to
-    require extraction.
+    Coordinates Extraction for source objects already determined by
+    synchronization orchestration to require extraction.
 
-Extraction owns:
-    - Source content retrieval through registered retrievers.
-    - Format-specific canonical content extraction.
-    - Canonical content hashing.
-    - Extraction-owned factual metadata.
-    - ExtractionRecord production.
-    - Record-level Extraction error isolation.
-    - Stage-level Extraction failure reporting.
+Responsibilities:
+    - Retrieve source content through registered content retrievers.
+    - Perform format-specific canonical content extraction.
+    - Generate canonical content hashes.
+    - Produce Extraction-owned factual metadata.
+    - Produce ExtractionRecords.
+    - Preserve orchestration correlation identity.
+    - Isolate record-level Extraction failures.
+    - Report stage-level Extraction failures.
+    - Produce and lock the completed ExtractionSection.
 
-Extraction does NOT:
+Does NOT:
     - Enumerate Sources of Truth.
     - Translate source metadata.
     - Determine synchronization state.
-    - Generate, modify, or interpret orchestration correlation identity.
+    - Generate or interpret orchestration correlation identity.
     - Persist Knowledge Objects.
     - Perform AI interpretation or enrichment.
-
-Correlation identity is assigned by Synchronization Orchestration.
-Extraction only propagates that identity through its successful
-and record-level failure outputs.
 """
 
 from datetime import datetime, timezone

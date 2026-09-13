@@ -1,3 +1,25 @@
+"""
+Source Container Observation Validator Test
+
+Purpose:
+    Validates SourceContainerObservationValidator behavior using controlled
+    Source Container observations.
+
+Verifies:
+    - Valid complete observations are accepted.
+    - Required observation fields are enforced.
+    - Duplicate or inconsistent identities are rejected.
+    - Invalid hierarchy relationships are rejected.
+    - Observation completeness requirements are enforced before persistence
+      decisions.
+
+Does NOT:
+    - Enumerate a Source of Truth.
+    - Persist Source Containers.
+    - Reconcile observations against the database.
+    - Synchronize content.
+"""
+
 from datetime import datetime, timezone
 from uuid import uuid4
 

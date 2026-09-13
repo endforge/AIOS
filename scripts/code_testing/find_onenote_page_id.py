@@ -1,20 +1,20 @@
 """
-File: find_onenote_page_id.py
+Find OneNote Page ID
 
 Purpose:
-    Locate a specific OneNote page and print its Microsoft Graph
-    page ID.
+    Locates a specific OneNote page and prints its Microsoft Graph page ID.
 
-Target:
-    Notebook: Mimic's Tavern
-    Section:  Lingo
-    Page:     Blacksmith Lingo
+Verifies:
+    - The configured notebook can be located.
+    - The configured section can be located.
+    - The configured page can be located.
+    - Microsoft Graph returns the current page identity.
 
-This script:
-    - Reads OneNote only.
-    - Does not modify OneNote.
-    - Does not write to the AlphaOmega database.
-    - Does not execute the synchronization pipeline.
+Does NOT:
+    - Modify OneNote.
+    - Write to the AlphaOmega database.
+    - Execute synchronization.
+    - Create Knowledge Objects.
 """
 
 from scripts.connectors.ms_graph.graph_connection import (

@@ -1,13 +1,22 @@
 """
-AlphaOmega Knowledge Object Repository Test
+Knowledge Object Repository Test
 
-Verifies authenticated read access to the knowledge_objects table
-through KnowledgeObjectRepository.
+Purpose:
+    Validates KnowledgeObjectRepository operations against the AlphaOmega
+    database.
 
-Tests both repository outcomes currently required by Discovery:
+Verifies:
+    - Knowledge Objects can be created through the repository.
+    - Knowledge Objects can be found by source identity.
+    - Existing Knowledge Objects can be updated.
+    - Repository operations preserve the expected Knowledge Object identity
+      and persisted values.
 
-1. Existing source identity returns the expected Knowledge Object facts.
-2. Unknown source identity returns None.
+Does NOT:
+    - Perform Discovery.
+    - Perform Extraction or Load.
+    - Retrieve content from a Source of Truth.
+    - Execute synchronization orchestration.
 """
 
 from common.security.local_credential_provider import LocalCredentialProvider

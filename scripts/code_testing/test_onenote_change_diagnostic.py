@@ -1,24 +1,21 @@
 """
-File: test_onenote_section_change_diagnostic.py
+OneNote Change Diagnostic
 
 Purpose:
-    Read-only diagnostic to determine whether the parent OneNote
-    Section provides a reliable modification signal when page body
-    content changes.
+    Diagnoses whether the parent OneNote Section provides a reliable
+    modification signal when page body content changes.
 
-Target:
-    Notebook : Mimic's Tavern
-    Section  : Lingo
-    Page     : Blacksmith Lingo
+Verifies:
+    - Live OneNote page metadata can be inspected.
+    - Parent Section modification metadata can be inspected.
+    - Page and Section modification signals can be compared for diagnostic
+      purposes.
 
-This script performs Microsoft Graph reads only.
-
-It does NOT:
-    - Run Discovery
-    - Run Extraction
-    - Run Load
-    - Create a Processing Job
-    - Write to AlphaOmega
+Does NOT:
+    - Modify OneNote.
+    - Write to AlphaOmega.
+    - Execute synchronization.
+    - Change OneNote timestamp handling.
 """
 
 import json

@@ -1,18 +1,24 @@
 """
-File:
-    test_source_browsing.py
+Source Browsing Service Test
 
 Purpose:
-    Perform a controlled live database test of the Lab 8
+    Performs a controlled live database test of the Lab 8
     SourceBrowsingService.
 
-This test verifies:
-    - Enabled Sources can be listed.
-    - Each enabled Source can be browsed.
-    - Active Source Containers are returned.
-    - Persisted hierarchy can be constructed.
+Verifies:
+    - Enabled registered Sources can be listed.
+    - A requested Source can be browsed through the application service.
+    - Active persisted Source Containers are returned.
+    - Persisted parent relationships are assembled into an application-facing
+      hierarchy.
+    - OneDrive and OneNote catalogs can be browsed without direct UI database
+      access.
 
-This test is read-only.
+Does NOT:
+    - Refresh Source Containers.
+    - Communicate with a Source of Truth.
+    - Synchronize content.
+    - Modify the AlphaOmega database.
 """
 
 

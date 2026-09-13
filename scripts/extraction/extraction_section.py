@@ -1,9 +1,22 @@
 """
-File: extraction_section.py
+AlphaOmega Extraction Section
 
 Purpose:
-    Stores the output produced by the Extraction stage
-    during a synchronization run.
+    Stores the completed output produced by the Extraction stage during a
+    synchronization run.
+
+Responsibilities:
+    - Store ExtractionRecords produced by Extraction.
+    - Store record-level Extraction errors.
+    - Record whether Extraction completed successfully.
+    - Provide completed Extraction output through the shared synchronization
+      section contract.
+
+Does NOT:
+    - Execute Extraction itself.
+    - Determine synchronization state.
+    - Perform Load.
+    - Allow modification after the section is locked.
 """
 
 from scripts.sync.sync_base_section import BaseSection

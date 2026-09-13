@@ -1,9 +1,22 @@
 """
-File: discovery_section.py
+AlphaOmega Discovery Section
 
 Purpose:
-    Stores the output produced by the Discovery stage
-    during a synchronization run.
+    Stores the completed output produced by the Discovery stage during a
+    synchronization run.
+
+Responsibilities:
+    - Store DiscoveryRecords produced by Discovery.
+    - Store record-level Discovery errors.
+    - Record whether Discovery completed successfully.
+    - Provide completed Discovery output through the shared synchronization
+      section contract.
+
+Does NOT:
+    - Execute Discovery itself.
+    - Modify Translator-owned information.
+    - Perform Extraction or Load.
+    - Allow modification after the section is locked.
 """
 
 from scripts.sync.sync_base_section import BaseSection

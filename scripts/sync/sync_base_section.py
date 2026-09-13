@@ -1,9 +1,21 @@
 """
-Base class for synchronization record sections.
+AlphaOmega Synchronization Base Section
 
-Each synchronization stage owns one section. The owning stage may populate
-that section while it is unlocked. After successful completion, the stage
-locks the section so downstream stages can read it but cannot modify it.
+Purpose:
+    Defines the common base behavior for synchronization record sections.
+
+Responsibilities:
+    - Provide the shared foundation for stage-owned synchronization sections.
+    - Allow an owning stage to populate its section while the section is unlocked.
+    - Lock completed sections against further modification.
+    - Freeze supported mutable values when a section is locked.
+    - Report whether a section is locked.
+
+Does NOT:
+    - Define stage-specific synchronization data.
+    - Determine when a synchronization stage has completed successfully.
+    - Unlock a section after it has been locked.
+    - Execute synchronization processing.
 """
 
 from types import MappingProxyType

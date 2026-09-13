@@ -1,43 +1,26 @@
 """
-File:
-    test_onenote_live_orchestrator_new.py
+Live OneNote Orchestrator NEW Test
 
 Purpose:
-    Controlled live multi-record end-to-end AlphaOmega
-    SynchronizationOrchestrator NEW test.
+    Validates a controlled live multi-record OneNote NEW synchronization run
+    through SynchronizationOrchestrator.
 
-Target:
-    OneNote
-        Notebook: Mimic's Tavern
-        Section:  House Rules
+Verifies:
+    - The Mimic's Tavern House Rules Section is identified exactly.
+    - The expected controlled page inventory exists before synchronization.
+    - Target page identities do not already exist in knowledge_objects.
+    - The controlled scope produces the expected synchronization associations.
+    - CONTENT records are classified NEW.
+    - NEW content proceeds through Extraction and Load.
+    - New Knowledge Objects are persisted.
+    - NEW synchronization history events are recorded.
+    - The Processing Job completes successfully.
 
-Expected starting state:
-    - Exactly 16 pages exist in the target OneNote Section.
-    - None of those 16 page identities exist in AlphaOmega
-      knowledge_objects.
-
-Expected synchronization result:
-    - 17 synchronization associations
-        - 1 CONTAINER
-        - 16 CONTENT
-    - 16 Discovery NEW
-    - 16 Extraction records
-    - 16 newly persisted Knowledge Objects
-    - 16 NEW Sync History events
-    - 1 completed Processing Job
-
-IMPORTANT:
-    THIS TEST WRITES TO ALPHAOMEGA.
-
-Safety:
-    Before Synchronization begins, the test independently verifies:
-        - exact Notebook identity by name
-        - exact Section identity by name
-        - exactly 16 pages exist
-        - all page IDs are unique
-        - none of the 16 page identities already exist in AlphaOmega
-
-    If any precondition fails, Synchronization is NOT executed.
+Does NOT:
+    - Execute synchronization when safety preconditions fail.
+    - Synchronize the complete OneNote Source of Truth.
+    - Modify OneNote source content.
+    - Treat the containing Section as a Knowledge Object.
 """
 
 from common.security.local_credential_provider import (

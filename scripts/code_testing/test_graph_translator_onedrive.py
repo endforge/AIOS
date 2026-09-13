@@ -1,15 +1,14 @@
 """
-File: test_graph_translator_onedrive.py
+Full OneDrive Connector and Translator Integration Test
 
 Purpose:
-    Full Microsoft Graph OneDrive Connector -> Translator integration test.
+    Validates the complete Microsoft Graph OneDrive Connector to Translator
+    integration against the entire OneDrive Source of Truth.
 
-This test enumerates the ENTIRE OneDrive Source of Truth.
-
-It validates:
-    - Connector completed successfully.
+Verifies:
+    - Connector processing completes successfully.
     - Connector enumeration is complete.
-    - Translator completed successfully.
+    - Translator processing completes successfully.
     - Every Connector object is accounted for.
     - OneDrive folders become CONTAINER.
     - OneDrive files become CONTENT.
@@ -20,9 +19,11 @@ It validates:
     - Source paths match Microsoft Graph when provided.
     - Translator record errors are reported.
 
-Unlike the deterministic sample test, this test does not print every
-record. It validates the complete source and reports only summaries
-and failures.
+Does NOT:
+    - Perform Discovery.
+    - Perform Extraction or Load.
+    - Persist Knowledge Objects.
+    - Modify OneDrive source data.
 """
 
 from collections import Counter

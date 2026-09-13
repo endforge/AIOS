@@ -1,3 +1,24 @@
+"""
+Source Container Refresh Transaction Test
+
+Purpose:
+    Validates the atomic database transaction used to apply Source Container
+    Refresh reconciliation results.
+
+Verifies:
+    - Source Container upserts can be applied within the Refresh transaction.
+    - Required deactivations can be applied within the same operation.
+    - Refresh persistence produces the expected final catalog state.
+    - The apply_source_container_refresh RPC provides the intended atomic
+      boundary.
+
+Does NOT:
+    - Enumerate a Source of Truth.
+    - Perform reconciliation.
+    - Decide which containers should be deactivated.
+    - Synchronize content.
+"""
+
 from datetime import datetime, timezone
 from uuid import uuid4
 

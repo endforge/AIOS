@@ -1,36 +1,28 @@
 """
-File: graph_translator.py
+AlphaOmega Microsoft Graph Translator
 
 Purpose:
-    Executes the Translator stage for Microsoft Graph sources.
+    Translates raw Microsoft Graph source objects into canonical AlphaOmega
+    TranslatorRecords.
 
-The GraphTranslator converts raw Microsoft Graph data preserved by the
-Connector stage into AlphaOmega's canonical synchronization model.
+Responsibilities:
+    - Translate supported OneDrive and OneNote source objects.
+    - Assign canonical CONTENT or CONTAINER object types.
+    - Preserve orchestration correlation identity.
+    - Preserve source-native object identity.
+    - Preserve connector-proven parent identity and hierarchy paths.
+    - Normalize source names and timestamps.
+    - Use the OneNote parent Section modification timestamp for page
+      source_modified_at.
+    - Isolate record-level translation failures.
+    - Produce and lock the completed TranslatorSection.
 
-Microsoft-specific structure is understood only by the GraphTranslator
-and its mapping module. Downstream synchronization stages operate only
-on TranslatorRecord objects.
-
-Synchronization correlation identity is supplied by Orchestration.
-Translator propagates correlation identity but does not generate,
-modify, or interpret it.
-
-OneNote synchronization note:
-    Microsoft Graph does not reliably update a Page object's
-    lastModifiedDateTime when page content changes.
-
-    The Graph Connector therefore preserves the containing OneNote
-    Section's lastModifiedDateTime in connector metadata as
-    source_section_modified_at.
-
-    For OneNote Page records only, Translator uses that Section
-    modification timestamp as the canonical source_modified_at
-    synchronization signal.
-
-    This behavior is intentionally conservative. A modification to any
-    page within a OneNote Section can cause other pages in the same
-    synchronized Section to appear MODIFIED. Downstream synchronization
-    remains responsible for processing those records normally.
+Does NOT:
+    - Retrieve source objects.
+    - Generate orchestration correlation identity.
+    - Determine synchronization state.
+    - Extract source content.
+    - Persist Knowledge Objects.
 """
 
 from collections.abc import Mapping

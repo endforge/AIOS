@@ -1,3 +1,22 @@
+"""
+OneNote Container Observation Test
+
+Purpose:
+    Validates complete live OneNote Source Container observation.
+
+Verifies:
+    - OneNoteContainerEnumerator produces a complete observation.
+    - Observed OneNote containers satisfy Source Container validation rules.
+    - Notebook, Section Group, and Section hierarchy information is suitable
+      for later reconciliation.
+
+Does NOT:
+    - Persist Source Containers.
+    - Reconcile against the existing catalog.
+    - Modify OneNote.
+    - Synchronize page content.
+"""
+
 from scripts.connectors.ms_graph.onenote_container_enumerator import (
     OneNoteContainerEnumerator,
 )

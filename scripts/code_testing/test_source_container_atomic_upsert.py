@@ -1,3 +1,24 @@
+"""
+Source Container Atomic Upsert Test
+
+Purpose:
+    Validates atomic persistence of Source Container observations through the
+    upsert_source_containers database operation.
+
+Verifies:
+    - Controlled Source Container records can be submitted atomically.
+    - New and existing container identities are handled correctly.
+    - Processing Job attribution is persisted with the catalog records.
+    - The database operation produces the expected persisted state.
+
+Does NOT:
+    - Enumerate a Source of Truth.
+    - Perform Source Container reconciliation.
+    - Synchronize content.
+    - Create Knowledge Objects.
+"""
+
+
 from datetime import datetime, timezone
 from uuid import uuid4
 

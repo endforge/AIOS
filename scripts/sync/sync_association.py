@@ -1,9 +1,22 @@
 """
-File: sync_association.py
+AlphaOmega Synchronization Association
 
 Purpose:
     Maintains cross-stage record association for one source object
     during a synchronization run.
+
+Responsibilities:
+    - Maintain the Translator, Discovery, and Extraction records associated
+      with one source object.
+    - Attach each stage record to the association as processing progresses.
+    - Preserve the relationship between records representing the same source
+      object across synchronization stages.
+
+Does NOT:
+    - Execute synchronization stages.
+    - Create stage records.
+    - Determine synchronization state.
+    - Persist synchronization data.
 """
 
 

@@ -1,25 +1,20 @@
 """
-File: test_onenote_page_hierarchy.py
+OneNote Page Hierarchy Diagnostic
 
 Purpose:
-    Diagnose raw Microsoft Graph OneNote page hierarchy information.
+    Diagnoses raw Microsoft Graph OneNote page hierarchy information.
 
-Target:
-    Notebook: Mimic's Tavern
-    Section:  Homebrew
+Verifies:
+    - A target notebook can be located.
+    - A target Section can be located.
+    - Raw page hierarchy information can be retrieved.
+    - Parent and child page information can be inspected for known targets.
 
-This diagnostic test:
-    - Finds the exact notebook.
-    - Finds the exact section.
-    - Retrieves all pages using pagelevel=true.
-    - Prints the pages in the exact order returned by Graph.
-    - Displays title, ID, level, and order.
-    - Highlights Selune Armor and Armor.
-
-This test does NOT:
-    - Run GraphTranslator.
-    - Reconstruct hierarchy.
-    - Modify any AlphaOmega data.
+Does NOT:
+    - Modify OneNote.
+    - Translate OneNote hierarchy into canonical records.
+    - Write to AlphaOmega.
+    - Execute synchronization.
 """
 
 from scripts.connectors.ms_graph.graph_connector import GraphConnector
